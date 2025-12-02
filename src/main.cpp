@@ -18,7 +18,7 @@ int main(void)
 
     /// INITIALIZATION
     //InitWindow(Game::screenWidth, Game::screenHeight, "raylib [core] example - basic window");
-    InitWindow((float)GetMonitorWidth(GetCurrentMonitor()), (float)GetMonitorHeight(GetCurrentMonitor()), "");
+    InitWindow(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), "");
     SetTargetFPS(60);   // Set our game to run at 60 frames-per-second
 
     //ToggleBorderlessWindowed();

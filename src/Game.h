@@ -11,6 +11,7 @@
 #include "utils.h"
 
 #include "Button.h"
+#include "Pathfinder.h"
 
 class Game
 {
@@ -25,6 +26,10 @@ public:
 	std::shared_ptr<Camera2D> ui_camera;
 
 	float game_zoom = 1;
+	float ui_zoom = 1;
+
+	Vector2 game_offset = Vector2(0, 0);
+	Vector2 ui_offset = Vector2(0, 0);
 
 	bool init(bool reset);
 	void update();
@@ -39,10 +44,17 @@ public:
 	Vector2 game_mouse_position;
 	Vector2 ui_mouse_position;
 
-	void handleZoom();
+	void handleZoom(std::shared_ptr<Camera2D> camera, float zoom);
 
 	float randomFromRange(float min, float max);
 
 private:
 	/// UI
+
+	/// Cells
+	int grid_root_size = 8;
+	int grid_box_size = 1;
+	std::vector<Cell> cells;
+
+	std::shared_ptr<Pathfinder> pathfinder;
 };
