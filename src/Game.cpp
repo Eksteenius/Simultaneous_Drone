@@ -16,11 +16,13 @@ bool Game::init(bool reset)
 	SetWindowState(FLAG_WINDOW_MINIMIZED);
 
 	game_camera->offset = { (float)GetMonitorWidth(GetCurrentMonitor()) / 2.0f, (float)GetMonitorHeight(GetCurrentMonitor()) / 2.0f };
+	game_camera->target = { ((float)GetMonitorWidth(GetCurrentMonitor()) / game_camera->zoom) / 2.0f, 
+							((float)GetMonitorHeight(GetCurrentMonitor()) / game_camera->zoom) / 2.0f };
 
 	/// UI
 	//HideCursor();
 
-	grid_box_size = screenHeight / grid_root_size;
+	grid_rect_size = screenHeight / grid_root_size;
 
 	cells.reserve(grid_root_size * grid_root_size);
 	for (int j = 0; j < grid_root_size; j++)
@@ -59,21 +61,21 @@ void Game::update()
 
 	/// CAMERA
 	float camera_move_speed = 500; 
-	if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) 
+	if (IsKeyDown(KEY_UP)) 
 	{
 		//game_offset = { game_offset.x, game_offset.y + camera_move_speed * dt }; 
 		game_camera->target = { game_camera->target.x, game_camera->target.y - camera_move_speed * dt };
 	} 
-	if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) 
+	if (IsKeyDown(KEY_DOWN)) 
 	{ 
 		//game_offset = { game_offset.x, game_offset.y - camera_move_speed * dt }; 
 		game_camera->target = { game_camera->target.x, game_camera->target.y + camera_move_speed * dt };
 	} 
-	if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) { 
+	if (IsKeyDown(KEY_LEFT)) { 
 		//game_offset = { game_offset.x + camera_move_speed * dt, game_offset.y }; 
 		game_camera->target = { game_camera->target.x - camera_move_speed * dt, game_camera->target.y };
 	} 
-	if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) 
+	if (IsKeyDown(KEY_RIGHT)) 
 	{ 
 		//game_offset = { game_offset.x - camera_move_speed * dt , game_offset.y }; 
 		game_camera->target = { game_camera->target.x + camera_move_speed * dt , game_camera->target.y };
@@ -88,9 +90,33 @@ void Game::update()
 	ui_mouse_position = { (GetMousePosition().x - ui_camera->offset.x) / ui_camera->zoom,
 						  (GetMousePosition().y - ui_camera->offset.y) / ui_camera->zoom };
 
+
+	if(IsKeyReleased(KEY_W))
+	{
+		if (position_cell_coords.y > 0) position_cell_coords.y--;
+		pathfinder->path_set = false;
+	}
+	else if (IsKeyReleased(KEY_S))
+	{
+		if (position_cell_coords.y < grid_root_size - 1) position_cell_coords.y++;
+		pathfinder->path_set = false;
+	}
+	else if (IsKeyReleased(KEY_A))
+	{
+		if (position_cell_coords.x > 0) position_cell_coords.x--;
+		pathfinder->path_set = false;
+	}
+	else if (IsKeyReleased(KEY_D))
+	{
+		if (position_cell_coords.x < grid_root_size - 1) position_cell_coords.x++;
+		pathfinder->path_set = false;
+	}
+
 	if(!pathfinder->path_set)
 	{
-		pathfinder->setStartEndIndex(0, cells.size() - 1);
+		pathfinder->setStartEndIndex(
+			utils::coordsToIndex(position_cell_coords, grid_root_size),
+			utils::coordsToIndex(destination_cell_coords, grid_root_size));
 	}
 	
 	while (!pathfinder->pathing_complete)
@@ -101,22 +127,24 @@ void Game::update()
 
 void Game::render()
 {
-	DrawRectangle(0, 0, 1920, 1080, DARKGRAY);
+	DrawRectangle(0, 0, screenWidth, screenHeight, DARKGRAY);
 
 	for(Cell& cell : cells)
 	{
-		DrawRectangleLines(cell.i * grid_box_size, cell.j * grid_box_size, grid_box_size, grid_box_size, WHITE);
+		DrawRectangleLines(cell.i * grid_rect_size, cell.j * grid_rect_size, grid_rect_size, grid_rect_size, WHITE);
 	}
 
 	for(std::reference_wrapper<Cell> cell : pathfinder->getLastSolvedPath())
 	{
-		DrawRectangle(cell.get().i * grid_box_size + (grid_box_size * 0.1f / 2), cell.get().j * grid_box_size + (grid_box_size * 0.1f / 2), 
-			grid_box_size * 0.9f, grid_box_size * 0.9f, BLUE);
+		DrawRectangle(cell.get().i * grid_rect_size + (grid_rect_size * 0.1f / 2), cell.get().j * grid_rect_size + (grid_rect_size * 0.1f / 2), 
+			grid_rect_size * 0.9f, grid_rect_size * 0.9f, BLUE);
 	}
 }
 
 void Game::render_ui()
 {
+	DrawCircle(screenWidth / 2.f, screenHeight / 2.f, 2, WHITE);
+
 	/// Custom Cursor
 	DrawCircle(ui_mouse_position.x, ui_mouse_position.y, 4, RED);
 }
@@ -138,14 +166,6 @@ void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom)
 	camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)screenHeight) * zoom; 
 }
 
-float Game::randomFromRange(float min, float max)
-{
-	std::random_device rd; // obtain a random number from hardware
-	std::mt19937 gen(rd()); // seed the generator
-	std::uniform_real_distribution<> distr(min, max); // define the range
-
-	return distr(gen);
-}
 
 /// Quantum Cameras
 

@@ -2,7 +2,6 @@
 #include <raylib.h>
 
 #include <iostream>
-#include <random>
 #include <cmath>
 #include <vector>
 #include <unordered_map>
@@ -46,15 +45,16 @@ public:
 
 	void handleZoom(std::shared_ptr<Camera2D> camera, float zoom);
 
-	float randomFromRange(float min, float max);
-
 private:
 	/// UI
 
 	/// Cells
 	int grid_root_size = 8;
-	int grid_box_size = 1;
+	int grid_rect_size = 1;
 	std::vector<Cell> cells;
 
 	std::shared_ptr<Pathfinder> pathfinder;
+
+	Vector2 position_cell_coords = { 0, 0 };
+	Vector2 destination_cell_coords = { (float)(grid_root_size - 1), (float)(grid_root_size - 1)};
 };

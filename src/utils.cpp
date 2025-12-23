@@ -1,5 +1,7 @@
 #include "utils.h"
 
+#include <random>
+
 bool utils::pointOverlapBox(Vector2 point, Vector2 box_position, float box_width, float box_height)
 {
 	if ((point.x > box_position.x && point.x < box_position.x + box_width) &&
@@ -21,4 +23,23 @@ bool utils::boxOverlapBox(std::pair<float, float> position_a, float width_a, flo
 		return true;
 	}
 	return false;
+}
+
+float utils::randomFromRange(float min, float max)
+{
+	std::random_device rd; // obtain a random number from hardware
+	std::mt19937 gen(rd()); // seed the generator
+	std::uniform_real_distribution<> distr(min, max); // define the range
+
+	return distr(gen);
+}
+
+int utils::coordsToIndex(int x, int y, int size)
+{
+	return x + y * size;
+}
+
+int utils::coordsToIndex(Vector2 coords, int size)
+{
+	return coords.x + coords.y * size;
 }

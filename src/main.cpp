@@ -25,11 +25,8 @@ int main(void)
 
     std::shared_ptr<Camera2D> game_camera = std::make_shared<Camera2D>();
     game_camera->target = { 0,0 };
-    //camera.offset = { 1920 / 2.0f, 1080 / 2.0f };
     game_camera->rotation = 0.0f;
-    //camera.zoom = 1.0f;
     game_camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)Game::screenHeight);
-    //camera->offset = { std::roundf((screenWidth*camera->zoom) / 2.0f), std::roundf((screenHeight * camera->zoom) / 2.0f) };
     game_camera->offset = { 0,0 };
 
     std::shared_ptr<Camera2D> ui_camera = std::make_shared<Camera2D>();
