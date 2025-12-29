@@ -42,6 +42,7 @@ public:
 	float scrollSpeed = 0.05f;
 	Vector2 game_mouse_position;
 	Vector2 ui_mouse_position;
+	Vector2 world_mouse_position;
 
 	void handleZoom(std::shared_ptr<Camera2D> camera, float zoom);
 
@@ -49,12 +50,12 @@ private:
 	/// UI
 
 	/// Cells
-	int grid_root_size = 8;
-	int grid_rect_size = 1;
+	int grid_root_size = 64;
+	float grid_rect_size = 1;
 	std::vector<Cell> cells;
 
 	std::shared_ptr<Pathfinder> pathfinder;
 
-	Vector2 position_cell_coords = { 0, 0 };
-	Vector2 destination_cell_coords = { (float)(grid_root_size - 1), (float)(grid_root_size - 1)};
+	Vector2 position_coords = { 0, 0 };
+	Vector2 destination_coords = { (float)(grid_root_size - 1), (float)(grid_root_size - 1)};
 };

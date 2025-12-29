@@ -22,7 +22,7 @@ bool Game::init(bool reset)
 	/// UI
 	//HideCursor();
 
-	grid_rect_size = screenHeight / grid_root_size;
+	grid_rect_size = (float)screenHeight / (float)grid_root_size;
 
 	cells.reserve(grid_root_size * grid_root_size);
 	for (int j = 0; j < grid_root_size; j++)
@@ -84,39 +84,44 @@ void Game::update()
 	game_zoom *= 1 + GetMouseWheelMove() * scrollSpeed; 
 	handleZoom(game_camera, game_zoom);
 
+	//ui_zoom *= 1 + GetMouseWheelMove() * scrollSpeed;
+	//handleZoom(ui_camera, ui_zoom);
+
 	game_mouse_position = { (GetMousePosition().x - game_camera->offset.x) / game_camera->zoom,
 							(GetMousePosition().y - game_camera->offset.y) / game_camera->zoom };
 
 	ui_mouse_position = { (GetMousePosition().x - ui_camera->offset.x) / ui_camera->zoom,
 						  (GetMousePosition().y - ui_camera->offset.y) / ui_camera->zoom };
 
+	world_mouse_position = GetScreenToWorld2D(GetMousePosition(), *game_camera);
+
 
 	if(IsKeyReleased(KEY_W))
 	{
-		if (position_cell_coords.y > 0) position_cell_coords.y--;
+		if (position_coords.y > 0) position_coords.y--;
 		pathfinder->path_set = false;
 	}
 	else if (IsKeyReleased(KEY_S))
 	{
-		if (position_cell_coords.y < grid_root_size - 1) position_cell_coords.y++;
+		if (position_coords.y < grid_root_size - 1) position_coords.y++;
 		pathfinder->path_set = false;
 	}
 	else if (IsKeyReleased(KEY_A))
 	{
-		if (position_cell_coords.x > 0) position_cell_coords.x--;
+		if (position_coords.x > 0) position_coords.x--;
 		pathfinder->path_set = false;
 	}
 	else if (IsKeyReleased(KEY_D))
 	{
-		if (position_cell_coords.x < grid_root_size - 1) position_cell_coords.x++;
+		if (position_coords.x < grid_root_size - 1) position_coords.x++;
 		pathfinder->path_set = false;
 	}
 
 	if(!pathfinder->path_set)
 	{
 		pathfinder->setStartEndIndex(
-			utils::coordsToIndex(position_cell_coords, grid_root_size),
-			utils::coordsToIndex(destination_cell_coords, grid_root_size));
+			utils::coordsToIndex(position_coords, grid_root_size),
+			utils::coordsToIndex(destination_coords, grid_root_size));
 	}
 	
 	while (!pathfinder->pathing_complete)
@@ -139,11 +144,17 @@ void Game::render()
 		DrawRectangle(cell.get().i * grid_rect_size + (grid_rect_size * 0.1f / 2), cell.get().j * grid_rect_size + (grid_rect_size * 0.1f / 2), 
 			grid_rect_size * 0.9f, grid_rect_size * 0.9f, BLUE);
 	}
+
+	Vector2 hovered_cell = utils::globalToCoords(world_mouse_position, grid_rect_size);
+	DrawRectangle(hovered_cell.x * grid_rect_size, hovered_cell.y * grid_rect_size, grid_rect_size, grid_rect_size, YELLOW);
+
+	/// Custom Cursor
+	DrawCircle(game_mouse_position.x, game_mouse_position.y, 4, GREEN);
 }
 
 void Game::render_ui()
 {
-	DrawCircle(screenWidth / 2.f, screenHeight / 2.f, 2, WHITE);
+	DrawCircle(screenWidth / 2.f / ui_zoom, screenHeight / 2.f / ui_zoom, 2, WHITE);
 
 	/// Custom Cursor
 	DrawCircle(ui_mouse_position.x, ui_mouse_position.y, 4, RED);

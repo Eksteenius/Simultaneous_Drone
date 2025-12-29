@@ -13,5 +13,7 @@ namespace utils
 
 	/// Uses grid root size
 	int coordsToIndex(int x, int y, int size);
-	int coordsToIndex(Vector2, int size);
+	int coordsToIndex(Vector2 coords, int size);
+
+	Vector2 globalToCoords(Vector2 coords, float size);
 }

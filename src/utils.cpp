@@ -1,6 +1,7 @@
 #include "utils.h"
 
 #include <random>
+#include <cmath>
 
 bool utils::pointOverlapBox(Vector2 point, Vector2 box_position, float box_width, float box_height)
 {
@@ -42,4 +43,9 @@ int utils::coordsToIndex(int x, int y, int size)
 int utils::coordsToIndex(Vector2 coords, int size)
 {
 	return coords.x + coords.y * size;
+}
+
+Vector2 utils::globalToCoords(Vector2 coords, float size)
+{
+	return Vector2((int)(coords.x / size), (int)(coords.y / size));
 }
