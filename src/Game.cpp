@@ -19,10 +19,17 @@ bool Game::init(bool reset)
 	game_camera->target = { ((float)GetMonitorWidth(GetCurrentMonitor()) / game_camera->zoom) / 2.0f, 
 							((float)GetMonitorHeight(GetCurrentMonitor()) / game_camera->zoom) / 2.0f };
 
+	/// CONTROLS
+	key_camera_up = {KEY_UP, KEY_W};
+	key_camera_down = { KEY_DOWN, KEY_S };
+	key_camera_left = { KEY_LEFT, KEY_A };
+	key_camera_right = { KEY_RIGHT, KEY_D };
+
 	/// UI
 	//HideCursor();
 
-	grid_rect_size = (float)screenHeight / (float)grid_root_size;
+	/// makes grid fit in screen height
+	//grid_rect_size = (float)screenHeight / (float)grid_root_size;
 
 	cells.reserve(grid_root_size * grid_root_size);
 	for (int j = 0; j < grid_root_size; j++)
@@ -61,24 +68,25 @@ void Game::update()
 
 	/// CAMERA
 	float camera_move_speed = 500; 
-	if (IsKeyDown(KEY_UP)) 
+	if (utils::isKeyVectorDown(key_camera_up)) 
 	{
 		//game_offset = { game_offset.x, game_offset.y + camera_move_speed * dt }; 
-		game_camera->target = { game_camera->target.x, game_camera->target.y - camera_move_speed * dt };
+		game_camera->target = { game_camera->target.x, game_camera->target.y - camera_move_speed / game_zoom * dt };
 	} 
-	if (IsKeyDown(KEY_DOWN)) 
+	if (utils::isKeyVectorDown(key_camera_down))
 	{ 
 		//game_offset = { game_offset.x, game_offset.y - camera_move_speed * dt }; 
-		game_camera->target = { game_camera->target.x, game_camera->target.y + camera_move_speed * dt };
+		game_camera->target = { game_camera->target.x, game_camera->target.y + camera_move_speed / game_zoom * dt };
 	} 
-	if (IsKeyDown(KEY_LEFT)) { 
+	if (utils::isKeyVectorDown(key_camera_left)) 
+	{
 		//game_offset = { game_offset.x + camera_move_speed * dt, game_offset.y }; 
-		game_camera->target = { game_camera->target.x - camera_move_speed * dt, game_camera->target.y };
+		game_camera->target = { game_camera->target.x - camera_move_speed / game_zoom * dt, game_camera->target.y };
 	} 
-	if (IsKeyDown(KEY_RIGHT)) 
+	if (utils::isKeyVectorDown(key_camera_right))
 	{ 
 		//game_offset = { game_offset.x - camera_move_speed * dt , game_offset.y }; 
-		game_camera->target = { game_camera->target.x + camera_move_speed * dt , game_camera->target.y };
+		game_camera->target = { game_camera->target.x + camera_move_speed / game_zoom * dt , game_camera->target.y };
 	} 
 	
 	game_zoom *= 1 + GetMouseWheelMove() * scrollSpeed; 
@@ -96,26 +104,26 @@ void Game::update()
 	world_mouse_position = GetScreenToWorld2D(GetMousePosition(), *game_camera);
 
 
-	if(IsKeyReleased(KEY_W))
-	{
-		if (position_coords.y > 0) position_coords.y--;
-		pathfinder->path_set = false;
-	}
-	else if (IsKeyReleased(KEY_S))
-	{
-		if (position_coords.y < grid_root_size - 1) position_coords.y++;
-		pathfinder->path_set = false;
-	}
-	else if (IsKeyReleased(KEY_A))
-	{
-		if (position_coords.x > 0) position_coords.x--;
-		pathfinder->path_set = false;
-	}
-	else if (IsKeyReleased(KEY_D))
-	{
-		if (position_coords.x < grid_root_size - 1) position_coords.x++;
-		pathfinder->path_set = false;
-	}
+	//if(IsKeyReleased(KEY_W))
+	//{
+	//	if (position_coords.y > 0) position_coords.y--;
+	//	pathfinder->path_set = false;
+	//}
+	//else if (IsKeyReleased(KEY_S))
+	//{
+	//	if (position_coords.y < grid_root_size - 1) position_coords.y++;
+	//	pathfinder->path_set = false;
+	//}
+	//else if (IsKeyReleased(KEY_A))
+	//{
+	//	if (position_coords.x > 0) position_coords.x--;
+	//	pathfinder->path_set = false;
+	//}
+	//else if (IsKeyReleased(KEY_D))
+	//{
+	//	if (position_coords.x < grid_root_size - 1) position_coords.x++;
+	//	pathfinder->path_set = false;
+	//}
 
 	if(!pathfinder->path_set)
 	{
@@ -132,11 +140,14 @@ void Game::update()
 
 void Game::render()
 {
-	DrawRectangle(0, 0, screenWidth, screenHeight, DARKGRAY);
+	DrawRectangle(0, 0, screenWidth, screenHeight, GRAY);
+
+	DrawRectangle(0, 0, grid_root_size * grid_rect_size, grid_root_size * grid_rect_size, DARKGRAY);
 
 	for(Cell& cell : cells)
 	{
-		DrawRectangleLines(cell.i * grid_rect_size, cell.j * grid_rect_size, grid_rect_size, grid_rect_size, WHITE);
+		DrawRectangleLines(
+			(cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size, WHITE);
 	}
 
 	for(std::reference_wrapper<Cell> cell : pathfinder->getLastSolvedPath())
@@ -149,7 +160,7 @@ void Game::render()
 	DrawRectangle(hovered_cell.x * grid_rect_size, hovered_cell.y * grid_rect_size, grid_rect_size, grid_rect_size, YELLOW);
 
 	/// Custom Cursor
-	DrawCircle(game_mouse_position.x, game_mouse_position.y, 4, GREEN);
+	//DrawCircle(game_mouse_position.x, game_mouse_position.y, 4, GREEN);
 }
 
 void Game::render_ui()

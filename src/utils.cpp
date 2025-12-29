@@ -49,3 +49,15 @@ Vector2 utils::globalToCoords(Vector2 coords, float size)
 {
 	return Vector2((int)(coords.x / size), (int)(coords.y / size));
 }
+
+bool utils::isKeyVectorDown(std::vector<KeyboardKey> keys)
+{
+	for (KeyboardKey& key : keys)
+	{
+		if (IsKeyDown(key))
+		{
+			return true;
+		}
+	}
+	return false;
+}

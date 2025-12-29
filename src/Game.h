@@ -51,11 +51,16 @@ private:
 
 	/// Cells
 	int grid_root_size = 64;
-	float grid_rect_size = 1;
+	float grid_rect_size = 100;
 	std::vector<Cell> cells;
 
 	std::shared_ptr<Pathfinder> pathfinder;
 
 	Vector2 position_coords = { 0, 0 };
 	Vector2 destination_coords = { (float)(grid_root_size - 1), (float)(grid_root_size - 1)};
+
+	std::vector<KeyboardKey> key_camera_up;
+	std::vector<KeyboardKey> key_camera_down;
+	std::vector<KeyboardKey> key_camera_left;
+	std::vector<KeyboardKey> key_camera_right;
 };

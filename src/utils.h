@@ -2,6 +2,7 @@
 #include <raylib.h>
 
 #include <iostream>
+#include <vector>
 
 namespace utils
 {
@@ -16,4 +17,6 @@ namespace utils
 	int coordsToIndex(Vector2 coords, int size);
 
 	Vector2 globalToCoords(Vector2 coords, float size);
+
+	bool isKeyVectorDown(std::vector<KeyboardKey> keys);
 }
