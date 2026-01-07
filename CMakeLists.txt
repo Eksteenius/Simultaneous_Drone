@@ -31,7 +31,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)  # Optional: disable compiler-specific extensions
 
 
-add_executable(CCTG_Sim_Drones ${SOURCES} "src/Game.h" "src/Game.cpp" "src/utils.h" "src/utils.cpp" "src/Button.h" "src/Button.cpp" "src/Cell.h" "src/Cell.cpp"  "src/Pathfinder.cpp" "src/Pathfinder.h" "src/globals.h")
+add_executable(CCTG_Sim_Drones ${SOURCES} "src/Game.h" "src/Game.cpp" "src/utils.h" "src/utils.cpp" "src/Button.h" "src/Button.cpp" "src/Cell.h" "src/Cell.cpp"  "src/Pathfinder.cpp" "src/Pathfinder.h" "src/globals.h" "src/Drone.h" "src/Drone.cpp")
 target_include_directories(CCTG_Sim_Drones PRIVATE "C:\\Users\\ethan\\Documents\\Work\\Programming\\Other\\Raylib\\build\\raylib\\include")
 
 

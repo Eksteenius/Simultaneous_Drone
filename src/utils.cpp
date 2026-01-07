@@ -50,6 +50,22 @@ Vector2 utils::globalToCoords(Vector2 coords, float size)
 	return Vector2((int)(coords.x / size), (int)(coords.y / size));
 }
 
+float utils::magnitude(Vector2 vector)
+{
+	return std::sqrtf(std::powf((vector.x), 2) + std::powf((vector.y), 2));
+}
+
+Vector2 utils::unitVector(Vector2 vector)
+{
+	float magnitude = utils::magnitude(vector);
+	return Vector2(vector.x / magnitude, vector.y / magnitude);
+}
+
+Vector2 utils::directionToPoint(Vector2 position, Vector2 point)
+{
+	return Vector2(point.x - position.x, point.y - position.y);
+}
+
 bool utils::isKeyVectorDown(std::vector<KeyboardKey> keys)
 {
 	for (KeyboardKey& key : keys)

@@ -20,10 +20,10 @@ bool Game::init(bool reset)
 							((float)GetMonitorHeight(GetCurrentMonitor()) / game_camera->zoom) / 2.0f };
 
 	/// CONTROLS
-	key_camera_up = {KEY_UP, KEY_W};
-	key_camera_down = { KEY_DOWN, KEY_S };
-	key_camera_left = { KEY_LEFT, KEY_A };
-	key_camera_right = { KEY_RIGHT, KEY_D };
+	key_move_up = {KEY_UP, KEY_W};
+	key_move_down = { KEY_DOWN, KEY_S };
+	key_move_left = { KEY_LEFT, KEY_A };
+	key_move_right = { KEY_RIGHT, KEY_D };
 
 	/// UI
 	//HideCursor();
@@ -68,22 +68,22 @@ void Game::update()
 
 	/// CAMERA
 	float camera_move_speed = 500; 
-	if (utils::isKeyVectorDown(key_camera_up)) 
+	if (utils::isKeyVectorDown(key_move_up)) 
 	{
 		//game_offset = { game_offset.x, game_offset.y + camera_move_speed * dt }; 
 		game_camera->target = { game_camera->target.x, game_camera->target.y - camera_move_speed / game_zoom * dt };
 	} 
-	if (utils::isKeyVectorDown(key_camera_down))
+	if (utils::isKeyVectorDown(key_move_down))
 	{ 
 		//game_offset = { game_offset.x, game_offset.y - camera_move_speed * dt }; 
 		game_camera->target = { game_camera->target.x, game_camera->target.y + camera_move_speed / game_zoom * dt };
 	} 
-	if (utils::isKeyVectorDown(key_camera_left)) 
+	if (utils::isKeyVectorDown(key_move_left)) 
 	{
 		//game_offset = { game_offset.x + camera_move_speed * dt, game_offset.y }; 
 		game_camera->target = { game_camera->target.x - camera_move_speed / game_zoom * dt, game_camera->target.y };
 	} 
-	if (utils::isKeyVectorDown(key_camera_right))
+	if (utils::isKeyVectorDown(key_move_right))
 	{ 
 		//game_offset = { game_offset.x - camera_move_speed * dt , game_offset.y }; 
 		game_camera->target = { game_camera->target.x + camera_move_speed / game_zoom * dt , game_camera->target.y };
@@ -103,6 +103,19 @@ void Game::update()
 
 	world_mouse_position = GetScreenToWorld2D(GetMousePosition(), *game_camera);
 
+	/// CLICK
+	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+	{
+		int index = utils::coordsToIndex(hovered_cell, grid_root_size);
+		if (index >= 0 && index < cells.size())
+		{
+			cells[index].barrier = true;
+			pathfinder->path_set = false;
+		}
+	}
+
+
+	/// MOVEMENT
 
 	//if(IsKeyReleased(KEY_W))
 	//{
@@ -125,6 +138,8 @@ void Game::update()
 	//	pathfinder->path_set = false;
 	//}
 
+	/// PATHFINDING
+
 	if(!pathfinder->path_set)
 	{
 		pathfinder->setStartEndIndex(
@@ -142,22 +157,35 @@ void Game::render()
 {
 	DrawRectangle(0, 0, screenWidth, screenHeight, GRAY);
 
+	/// Cells
 	DrawRectangle(0, 0, grid_root_size * grid_rect_size, grid_root_size * grid_rect_size, DARKGRAY);
-
-	for(Cell& cell : cells)
+	for (Cell& cell : cells)
 	{
-		DrawRectangleLines(
-			(cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size, WHITE);
-	}
+		DrawRectangleLines((cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size, WHITE);
 
-	for(std::reference_wrapper<Cell> cell : pathfinder->getLastSolvedPath())
+		if (cell.barrier == true)
+		{
+			DrawRectangle((cell.i * grid_rect_size) + 1, (cell.j * grid_rect_size) + 1,
+				grid_rect_size - 2, grid_rect_size - 2, BLACK);
+		}
+	}
+	if (pathfinder->pathing_solved)
 	{
-		DrawRectangle(cell.get().i * grid_rect_size + (grid_rect_size * 0.1f / 2), cell.get().j * grid_rect_size + (grid_rect_size * 0.1f / 2), 
-			grid_rect_size * 0.9f, grid_rect_size * 0.9f, BLUE);
+		for (std::reference_wrapper<Cell> cell : pathfinder->getLastSolvedPath())
+		{
+			DrawRectangle(cell.get().i * grid_rect_size + 1, cell.get().j * grid_rect_size + 1,
+				grid_rect_size - 2, grid_rect_size - 2, BLUE);
+		}
 	}
+	
+	/// UI
+	hovered_cell = utils::globalToCoords(world_mouse_position, grid_rect_size);
+	DrawRectangle(hovered_cell.x * grid_rect_size + 1, hovered_cell.y * grid_rect_size + 1,
+		grid_rect_size - 2, grid_rect_size - 2, YELLOW);
 
-	Vector2 hovered_cell = utils::globalToCoords(world_mouse_position, grid_rect_size);
-	DrawRectangle(hovered_cell.x * grid_rect_size, hovered_cell.y * grid_rect_size, grid_rect_size, grid_rect_size, YELLOW);
+	/// Drone
+	DrawRing(Vector2{ drone_position.x + (grid_rect_size / 2.f), drone_position.y + (grid_rect_size / 2.f) },
+		(grid_rect_size / 2.f) - 4, (grid_rect_size / 2.f), 0, 360, 1, WHITE);
 
 	/// Custom Cursor
 	//DrawCircle(game_mouse_position.x, game_mouse_position.y, 4, GREEN);

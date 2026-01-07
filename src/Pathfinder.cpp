@@ -84,12 +84,12 @@ void Pathfinder::AStar()
                             int difference_i = current_cell.i - neighbor.i;
                             int difference_j = current_cell.j - neighbor.j;
 
-                            if(cells.at(current_cell.i * (int)sqrt(cells.size()) + current_cell.j - difference_j).barrier)
+                            if(cells.at(current_cell.j * (int)sqrt(cells.size()) + current_cell.i - difference_i).barrier)
                             {
                                 diagonal_blocked = true;
                             }
 
-                            if (cells.at((current_cell.i - difference_i) * (int)sqrt(cells.size()) + current_cell.j).barrier)
+                            if (cells.at((current_cell.j - difference_j) * (int)sqrt(cells.size()) + current_cell.i).barrier)
                             {
                                 diagonal_blocked = true;
                             }
@@ -97,7 +97,6 @@ void Pathfinder::AStar()
 
                         if (!diagonal_blocked)
                         {
-
                             float tentative_g;
 
                             if (neighbor.i != current_cell.i && neighbor.j != current_cell.j)
