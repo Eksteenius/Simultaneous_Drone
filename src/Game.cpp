@@ -31,6 +31,7 @@ bool Game::init(bool reset)
 	/// Makes grid fit in screen height
 	//grid_rect_size = (float)screenHeight / (float)grid_root_size;
 
+	/// Cell setup for pathfinding
 	cells.reserve(grid_root_size * grid_root_size);
 	for (int j = 0; j < grid_root_size; j++)
 	{
@@ -44,9 +45,10 @@ bool Game::init(bool reset)
 		cell.addNeighbors(cells, grid_root_size, grid_root_size);
 	}
 
-
 	pathfinder = std::make_shared<Pathfinder>(Pathfinder(cells));
 
+	/// Drone initialization
+	drone.size = (grid_rect_size / 2.f);
 
 	return true;
 }
@@ -119,7 +121,7 @@ void Game::update()
 	if(!pathfinder->path_set)
 	{
 		pathfinder->setStartEndIndex(
-			utils::coordsToIndex(utils::globalToCoords(drone.position, grid_rect_size), grid_root_size),
+			utils::coordsToIndex(utils::globalToCoords(drone.center(), grid_rect_size), grid_root_size),
 			utils::coordsToIndex(destination_coords, grid_root_size));
 	}
 	
@@ -172,8 +174,7 @@ void Game::render()
 		grid_rect_size - 2, grid_rect_size - 2, YELLOW);
 
 	/// DRONE
-	DrawRing(Vector2{ drone.position.x + (grid_rect_size / 2.f), drone.position.y + (grid_rect_size / 2.f) },
-		(grid_rect_size / 2.f) - 4, (grid_rect_size / 2.f), 0, 360, 1, WHITE);
+	DrawRing(drone.center(), drone.size - 4, drone.size, 0, 360, 1, WHITE);
 
 	/// CUSTOM CURSOR
 	//DrawCircle(game_mouse_position.x, game_mouse_position.y, 4, GREEN);

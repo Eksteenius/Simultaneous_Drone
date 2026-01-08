@@ -8,6 +8,11 @@ Drone::~Drone()
 {
 }
 
+Vector2 Drone::center()
+{
+	return { position.x + size, position.y + size };
+}
+
 void Drone::moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, float dt)
 {
 	if (_pathfinder->pathing_complete)
@@ -24,18 +29,22 @@ void Drone::moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, floa
 			_pathfinder->path_in_use = true;
 		}
 
-		if (_pathfinder->pathing_solved || _pathfinder->getLastSolvedPath().size() > 0)
-		{
-			Vector2 tile_coords = { 0, 0 };
-			if (_pathfinder->pathing_solved)
-			{
-				tile_coords = Vector2(_pathfinder->getPath()[path_progress].get().i, _pathfinder->getPath()[path_progress].get().j);
-			}
-			else if (_pathfinder->getLastSolvedPath().size() > 0)
-			{
-				tile_coords = Vector2(_pathfinder->getLastSolvedPath()[path_progress].get().i, _pathfinder->getLastSolvedPath()[path_progress].get().j);
-			}
+		Vector2 tile_coords = { -1, -1 };
+		bool tile_valid = false;
 
+		if (_pathfinder->pathing_solved && _pathfinder->getPath()[path_progress].get().barrier == false)
+		{
+			tile_coords = Vector2(_pathfinder->getPath()[path_progress].get().i, _pathfinder->getPath()[path_progress].get().j);
+			tile_valid = true;
+		}
+		else if (_pathfinder->getLastSolvedPath().size() > 0 && _pathfinder->getLastSolvedPath()[path_progress].get().barrier == false)
+		{
+			tile_coords = Vector2(_pathfinder->getLastSolvedPath()[path_progress].get().i, _pathfinder->getLastSolvedPath()[path_progress].get().j);
+			tile_valid = true;
+		}
+
+		if (tile_valid)
+		{
 			Vector2 coords = Vector2(tile_coords.x * size, tile_coords.y * size);
 
 			Vector2 distance = { coords.x - position.x, coords.y - position.y };
