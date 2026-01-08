@@ -49,17 +49,11 @@ void Pathfinder::AStar()
             while (temp_current->previous != nullptr)
             {
                 path.push_back(*temp_current->previous);
-                temp_current = temp_current->previous.get();
+                temp_current = temp_current->previous;
             }
 
             if (current_cell == cells[end_cell_index])
             {
-                while (temp_current->previous != nullptr)
-                {
-                    path.push_back(*temp_current->previous);
-                    temp_current = temp_current->previous.get();
-                }
-
                 pathing_complete = true;
                 pathing_solved = true;
             }
@@ -129,7 +123,7 @@ void Pathfinder::AStar()
                             {
                                 neighbor.h = heuristic(current_cell, neighbor, cells[end_cell_index]);
                                 neighbor.f = neighbor.g + neighbor.h;
-                                neighbor.previous = std::make_shared<Cell>(current_cell);
+                                neighbor.previous = &current_cell;
                             }
                         }
                     }
@@ -210,6 +204,8 @@ void Pathfinder::resetPathfinder()
     pathing_solved = false;
 
     open_set.push_back(cells[start_cell_index]);
+
+    path_in_use = false;
 }
 
 void Pathfinder::setStartEndIndex(int start_index, int end_index)

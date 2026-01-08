@@ -26,7 +26,7 @@ public:
 
 	std::vector<std::reference_wrapper<Cell>> neighbors;
 
-	std::shared_ptr<Cell> previous = nullptr;
+	Cell* previous = nullptr;
 
 	bool operator==(const Cell& other) const 
 	{

@@ -27,6 +27,8 @@ public:
     bool pathing_complete = false;
     bool pathing_solved = false;
 
+    bool path_in_use = false;
+
 private:
     int start_cell_index;
     int end_cell_index;

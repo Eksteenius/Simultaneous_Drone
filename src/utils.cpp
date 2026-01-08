@@ -45,9 +45,14 @@ int utils::coordsToIndex(Vector2 coords, int size)
 	return coords.x + coords.y * size;
 }
 
-Vector2 utils::globalToCoords(Vector2 coords, float size)
+Vector2 utils::globalToCoords(Vector2 global, float size)
 {
-	return Vector2((int)(coords.x / size), (int)(coords.y / size));
+	return Vector2((int)(global.x / size), (int)(global.y / size));
+}
+
+Vector2 utils::coordsToGlobal(Vector2 coords, float size)
+{
+	return Vector2(coords.x * size, coords.y * size);
 }
 
 float utils::magnitude(Vector2 vector)

@@ -28,7 +28,7 @@ bool Game::init(bool reset)
 	/// UI
 	//HideCursor();
 
-	/// makes grid fit in screen height
+	/// Makes grid fit in screen height
 	//grid_rect_size = (float)screenHeight / (float)grid_root_size;
 
 	cells.reserve(grid_root_size * grid_root_size);
@@ -109,41 +109,17 @@ void Game::update()
 		int index = utils::coordsToIndex(hovered_cell, grid_root_size);
 		if (index >= 0 && index < cells.size())
 		{
-			cells[index].barrier = true;
+			cells[index].barrier = !cells[index].barrier;
 			pathfinder->path_set = false;
 		}
 	}
-
-
-	/// MOVEMENT
-
-	//if(IsKeyReleased(KEY_W))
-	//{
-	//	if (position_coords.y > 0) position_coords.y--;
-	//	pathfinder->path_set = false;
-	//}
-	//else if (IsKeyReleased(KEY_S))
-	//{
-	//	if (position_coords.y < grid_root_size - 1) position_coords.y++;
-	//	pathfinder->path_set = false;
-	//}
-	//else if (IsKeyReleased(KEY_A))
-	//{
-	//	if (position_coords.x > 0) position_coords.x--;
-	//	pathfinder->path_set = false;
-	//}
-	//else if (IsKeyReleased(KEY_D))
-	//{
-	//	if (position_coords.x < grid_root_size - 1) position_coords.x++;
-	//	pathfinder->path_set = false;
-	//}
 
 	/// PATHFINDING
 
 	if(!pathfinder->path_set)
 	{
 		pathfinder->setStartEndIndex(
-			utils::coordsToIndex(position_coords, grid_root_size),
+			utils::coordsToIndex(utils::globalToCoords(drone.position, grid_rect_size), grid_root_size),
 			utils::coordsToIndex(destination_coords, grid_root_size));
 	}
 	
@@ -151,13 +127,17 @@ void Game::update()
 	{
 		pathfinder->AStar();
 	}
+
+	/// DRONE MOVEMENT
+	drone.moveOnPath(pathfinder, grid_rect_size, dt);
+	//drone.moveToPoint(utils::coordsToGlobal(destination_coords, grid_rect_size), dt);
 }
 
 void Game::render()
 {
 	DrawRectangle(0, 0, screenWidth, screenHeight, GRAY);
 
-	/// Cells
+	/// CELLS
 	DrawRectangle(0, 0, grid_root_size * grid_rect_size, grid_root_size * grid_rect_size, DARKGRAY);
 	for (Cell& cell : cells)
 	{
@@ -171,10 +151,18 @@ void Game::render()
 	}
 	if (pathfinder->pathing_solved)
 	{
-		for (std::reference_wrapper<Cell> cell : pathfinder->getLastSolvedPath())
+		for (Cell& cell : pathfinder->getLastSolvedPath())
 		{
-			DrawRectangle(cell.get().i * grid_rect_size + 1, cell.get().j * grid_rect_size + 1,
-				grid_rect_size - 2, grid_rect_size - 2, BLUE);
+			DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
+				grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(BLUE, 0.25f));
+		}
+	}
+	else if (pathfinder->getLastSolvedPath().size() > 0)
+	{
+		for (Cell& cell : pathfinder->getLastSolvedPath())
+		{
+			DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
+				grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(RED, 0.25f));
 		}
 	}
 	
@@ -183,11 +171,11 @@ void Game::render()
 	DrawRectangle(hovered_cell.x * grid_rect_size + 1, hovered_cell.y * grid_rect_size + 1,
 		grid_rect_size - 2, grid_rect_size - 2, YELLOW);
 
-	/// Drone
-	DrawRing(Vector2{ drone_position.x + (grid_rect_size / 2.f), drone_position.y + (grid_rect_size / 2.f) },
+	/// DRONE
+	DrawRing(Vector2{ drone.position.x + (grid_rect_size / 2.f), drone.position.y + (grid_rect_size / 2.f) },
 		(grid_rect_size / 2.f) - 4, (grid_rect_size / 2.f), 0, 360, 1, WHITE);
 
-	/// Custom Cursor
+	/// CUSTOM CURSOR
 	//DrawCircle(game_mouse_position.x, game_mouse_position.y, 4, GREEN);
 }
 
@@ -195,7 +183,7 @@ void Game::render_ui()
 {
 	DrawCircle(screenWidth / 2.f / ui_zoom, screenHeight / 2.f / ui_zoom, 2, WHITE);
 
-	/// Custom Cursor
+	/// CUSTOM CURSOR
 	DrawCircle(ui_mouse_position.x, ui_mouse_position.y, 4, RED);
 }
 
@@ -217,7 +205,7 @@ void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom)
 }
 
 
-/// Quantum Cameras
+/// QUANTUM CAMERAS
 
 //void Game::handleZoom(std::shared_ptr<Camera2D> camera, Vector2 offset, float zoom)
 //{

@@ -11,6 +11,7 @@
 
 #include "Button.h"
 #include "Pathfinder.h"
+#include "Drone.h"
 
 class Game
 {
@@ -52,17 +53,16 @@ private:
 	Vector2 hovered_cell = { 0, 0 };
 
 	/// Cells
-	int grid_root_size = 64;
+	int grid_root_size = 16;
 	float grid_rect_size = 100;
 	std::vector<Cell> cells;
 
 	/// Drones
 
-	Vector2 drone_position = { 0, 0 };
+	Drone drone;
 
 	std::shared_ptr<Pathfinder> pathfinder;
 
-	Vector2 position_coords = { 0, 0 };
 	Vector2 destination_coords = { (float)(grid_root_size - 1), (float)(grid_root_size - 1)};
 
 	
