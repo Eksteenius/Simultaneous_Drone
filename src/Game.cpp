@@ -14,6 +14,7 @@ Game::~Game()
 bool Game::init(bool reset)
 {
 	SetWindowState(FLAG_WINDOW_MINIMIZED);
+	SetConfigFlags(FLAG_WINDOW_ALWAYS_RUN);
 
 	game_camera->offset = { (float)GetMonitorWidth(GetCurrentMonitor()) / 2.0f, (float)GetMonitorHeight(GetCurrentMonitor()) / 2.0f };
 	game_camera->target = { ((float)GetMonitorWidth(GetCurrentMonitor()) / game_camera->zoom) / 2.0f, 
@@ -151,7 +152,11 @@ void Game::update()
 		//drone.moveToPoint(utils::coordsToGlobal(destination_coords, grid_rect_size), dt);
 	}
 
-	if (utils::isKeyVectorReleased(key_pause))
+	if(IsWindowMinimized())
+	{
+		paused = true;
+	}
+	else if (utils::isKeyVectorReleased(key_pause))
 	{
 		paused = !paused;
 	}
