@@ -20,6 +20,8 @@ bool Game::init(bool reset)
 							((float)GetMonitorHeight(GetCurrentMonitor()) / game_camera->zoom) / 2.0f };
 
 	/// CONTROLS
+	key_pause = { KEY_TAB, KEY_ESCAPE };
+
 	key_move_up = {KEY_UP, KEY_W};
 	key_move_down = { KEY_DOWN, KEY_S };
 	key_move_left = { KEY_LEFT, KEY_A };
@@ -55,84 +57,115 @@ bool Game::init(bool reset)
 
 void Game::update()
 {
-	/// PHYSICS
-	float dt = GetFrameTime();
-
-	/// INPUT
-	UpdateKeyToggles();
-
-	/// WINDOW
-	if (IsKeyPressed(KEY_ESCAPE))
+	if (!paused)
 	{
-		//MinimizeWindow();
-		CloseWindow();
-	}
+		/// PHYSICS
+		float dt = GetFrameTime();
 
-	/// CAMERA
-	float camera_move_speed = 500; 
-	if (utils::isKeyVectorDown(key_move_up)) 
-	{
-		//game_offset = { game_offset.x, game_offset.y + camera_move_speed * dt }; 
-		game_camera->target = { game_camera->target.x, game_camera->target.y - camera_move_speed / game_zoom * dt };
-	} 
-	if (utils::isKeyVectorDown(key_move_down))
-	{ 
-		//game_offset = { game_offset.x, game_offset.y - camera_move_speed * dt }; 
-		game_camera->target = { game_camera->target.x, game_camera->target.y + camera_move_speed / game_zoom * dt };
-	} 
-	if (utils::isKeyVectorDown(key_move_left)) 
-	{
-		//game_offset = { game_offset.x + camera_move_speed * dt, game_offset.y }; 
-		game_camera->target = { game_camera->target.x - camera_move_speed / game_zoom * dt, game_camera->target.y };
-	} 
-	if (utils::isKeyVectorDown(key_move_right))
-	{ 
-		//game_offset = { game_offset.x - camera_move_speed * dt , game_offset.y }; 
-		game_camera->target = { game_camera->target.x + camera_move_speed / game_zoom * dt , game_camera->target.y };
-	} 
-	
-	game_zoom *= 1 + GetMouseWheelMove() * scrollSpeed; 
-	handleZoom(game_camera, game_zoom);
+		/// INPUT
+		UpdateKeyToggles();
 
-	//ui_zoom *= 1 + GetMouseWheelMove() * scrollSpeed;
-	//handleZoom(ui_camera, ui_zoom);
-
-	game_mouse_position = { (GetMousePosition().x - game_camera->offset.x) / game_camera->zoom,
-							(GetMousePosition().y - game_camera->offset.y) / game_camera->zoom };
-
-	ui_mouse_position = { (GetMousePosition().x - ui_camera->offset.x) / ui_camera->zoom,
-						  (GetMousePosition().y - ui_camera->offset.y) / ui_camera->zoom };
-
-	world_mouse_position = GetScreenToWorld2D(GetMousePosition(), *game_camera);
-
-	/// CLICK
-	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-	{
-		int index = utils::coordsToIndex(hovered_cell, grid_root_size);
-		if (index >= 0 && index < cells.size())
+		/// WINDOW
+		if (IsKeyPressed(KEY_ESCAPE))
 		{
-			cells[index].barrier = !cells[index].barrier;
-			pathfinder->path_set = false;
+			//MinimizeWindow();
+			CloseWindow();
 		}
+
+		/// CAMERA
+		float camera_move_speed = 500;
+		if (utils::isKeyVectorDown(key_move_up))
+		{
+			//game_offset = { game_offset.x, game_offset.y + camera_move_speed * dt }; 
+			game_camera->target = { game_camera->target.x, game_camera->target.y - camera_move_speed / game_zoom * dt };
+		}
+		if (utils::isKeyVectorDown(key_move_down))
+		{
+			//game_offset = { game_offset.x, game_offset.y - camera_move_speed * dt }; 
+			game_camera->target = { game_camera->target.x, game_camera->target.y + camera_move_speed / game_zoom * dt };
+		}
+		if (utils::isKeyVectorDown(key_move_left))
+		{
+			//game_offset = { game_offset.x + camera_move_speed * dt, game_offset.y }; 
+			game_camera->target = { game_camera->target.x - camera_move_speed / game_zoom * dt, game_camera->target.y };
+		}
+		if (utils::isKeyVectorDown(key_move_right))
+		{
+			//game_offset = { game_offset.x - camera_move_speed * dt , game_offset.y }; 
+			game_camera->target = { game_camera->target.x + camera_move_speed / game_zoom * dt , game_camera->target.y };
+		}
+
+		game_zoom *= 1 + GetMouseWheelMove() * scrollSpeed;
+		handleZoom(game_camera, game_zoom);
+
+		//ui_zoom *= 1 + GetMouseWheelMove() * scrollSpeed;
+		//handleZoom(ui_camera, ui_zoom);
+
+		game_mouse_position = { (GetMousePosition().x - game_camera->offset.x) / game_camera->zoom,
+								(GetMousePosition().y - game_camera->offset.y) / game_camera->zoom };
+
+		ui_mouse_position = { (GetMousePosition().x - ui_camera->offset.x) / ui_camera->zoom,
+							  (GetMousePosition().y - ui_camera->offset.y) / ui_camera->zoom };
+
+		world_mouse_position = GetScreenToWorld2D(GetMousePosition(), *game_camera);
+
+		/// CLICK
+		if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+		{
+			int index = utils::coordsToIndex(hovered_cell, grid_root_size);
+			if (index >= 0 && index < cells.size())
+			{
+				cells[index].barrier = !cells[index].barrier;
+				pathfinder->path_set = false;
+			}
+		}
+
+		/// PATHFINDING
+
+		if (!pathfinder->path_set)
+		{
+			Vector2* drone_tile = drone.getTilePathing();
+			if (drone_tile != nullptr)
+			{
+				pathfinder->setStartEndIndex(
+					utils::coordsToIndex(*drone_tile, grid_root_size),
+					utils::coordsToIndex(destination_coords, grid_root_size));
+			}
+			else
+			{
+				pathfinder->setStartEndIndex(
+					utils::coordsToIndex(utils::globalToCoords(drone.position, grid_rect_size), grid_root_size),
+					utils::coordsToIndex(destination_coords, grid_root_size));
+			}
+
+
+		}
+
+		while (!pathfinder->pathing_complete)
+		{
+			pathfinder->AStar();
+		}
+
+		/// DRONE MOVEMENT
+		drone.moveOnPath(pathfinder, grid_rect_size, dt);
+		//drone.moveToPoint(utils::coordsToGlobal(destination_coords, grid_rect_size), dt);
 	}
 
-	/// PATHFINDING
-
-	if(!pathfinder->path_set)
+	if(IsWindowState(FLAG_WINDOW_MINIMIZED))
 	{
-		pathfinder->setStartEndIndex(
-			utils::coordsToIndex(utils::globalToCoords(drone.center(), grid_rect_size), grid_root_size),
-			utils::coordsToIndex(destination_coords, grid_root_size));
+		paused = true;
 	}
-	
-	while (!pathfinder->pathing_complete)
+	if (utils::isKeyVectorReleased(key_pause))
 	{
-		pathfinder->AStar();
+		paused = !paused;
 	}
-
-	/// DRONE MOVEMENT
-	drone.moveOnPath(pathfinder, grid_rect_size, dt);
-	//drone.moveToPoint(utils::coordsToGlobal(destination_coords, grid_rect_size), dt);
+	//else if (GetKeyPressed() != 0 || utils::isAnyMouseButtonReleased() || GetMouseWheelMove() != 0.0f)
+	//{
+	//	if (utils::isKeyVectorDown(key_pause) != true)
+	//	{
+	//		paused = false;
+	//	}
+	//}
 }
 
 void Game::render()
@@ -186,6 +219,12 @@ void Game::render_ui()
 
 	/// CUSTOM CURSOR
 	DrawCircle(ui_mouse_position.x, ui_mouse_position.y, 4, RED);
+
+	if (paused)
+	{
+		DrawRectangle(0, 0, screenWidth, 50, ColorAlpha(BLACK, 0.5f));
+		DrawText("PAUSED: Press any key to continue...", 0, 0, 50, WHITE);
+	}
 }
 
 void Game::UpdateKeyToggles()

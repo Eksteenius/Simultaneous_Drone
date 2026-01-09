@@ -17,6 +17,7 @@ void Drone::moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, floa
 {
 	if (_pathfinder->pathing_complete)
 	{
+		/// Pathfinder will set path in use to false when path is reset
 		if (_pathfinder->path_in_use == false)
 		{
 			//proximity_distance = size / 2.f;
@@ -29,8 +30,8 @@ void Drone::moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, floa
 			_pathfinder->path_in_use = true;
 		}
 
-		Vector2 tile_coords = { -1, -1 };
-		bool tile_valid = false;
+		tile_coords = { -1, -1 };
+		tile_valid = false;
 
 		if (_pathfinder->pathing_solved && _pathfinder->getPath()[path_progress].get().barrier == false)
 		{
@@ -62,6 +63,15 @@ void Drone::moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, floa
 			}
 		}
 	}
+}
+
+Vector2* Drone::getTilePathing()
+{
+	if (tile_valid)
+	{
+		return &tile_coords;
+	}
+	return nullptr;
 }
 
 void Drone::moveToPoint(Vector2 point, float dt)

@@ -82,3 +82,20 @@ bool utils::isKeyVectorDown(std::vector<KeyboardKey> keys)
 	}
 	return false;
 }
+
+bool utils::isKeyVectorReleased(std::vector<KeyboardKey> keys)
+{
+	for (KeyboardKey& key : keys)
+	{
+		if (IsKeyReleased(key))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool utils::isAnyMouseButtonReleased()
+{
+	return IsMouseButtonReleased(MOUSE_BUTTON_LEFT) || IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) || IsMouseButtonReleased(MOUSE_BUTTON_MIDDLE);
+}

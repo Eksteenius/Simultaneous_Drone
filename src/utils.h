@@ -27,4 +27,7 @@ namespace utils
 
 	/// Check if any of multiple keys are down
 	bool isKeyVectorDown(std::vector<KeyboardKey> keys);
+	bool isKeyVectorReleased(std::vector<KeyboardKey> keys);
+
+	bool isAnyMouseButtonReleased();
 }

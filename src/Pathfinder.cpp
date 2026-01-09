@@ -27,9 +27,8 @@ void Pathfinder::AStar()
                 if (open_set.at(i).get().f < open_set.at(lowestIndex).get().f)
                 {
                     lowestIndex = i;
-                }
-
-                if (open_set.at(i).get().f == open_set.at(lowestIndex).get().f)
+                } 
+                else if (open_set.at(i).get().f == open_set.at(lowestIndex).get().f)
                 {
                     if (open_set.at(i).get().g > open_set.at(lowestIndex).get().g)
                     {
@@ -66,8 +65,6 @@ void Pathfinder::AStar()
 
                 for (int i = 0; i < current_cell.neighbors.size(); i++)
                 {
-                    //std::shared_ptr<Cell> neighbor = std::make_shared<Cell>(current_cell->neighbors[i]);
-                    //std::shared_ptr<Cell> neighbor = std::make_shared<Cell>(current_cell.neighbors->at(i));
                     Cell& neighbor = current_cell.neighbors.at(i);
 
                     if (std::find(closed_set.begin(), closed_set.end(), neighbor) == closed_set.end() && neighbor.barrier == false)

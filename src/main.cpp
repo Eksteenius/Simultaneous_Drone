@@ -35,10 +35,6 @@ int main(void)
     ui_camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)Game::screenHeight);
     ui_camera->offset = { 0,0 };
 
-#if defined(PLATFORM_WEB)
-    emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
-#else
-
     Game game(game_camera, ui_camera);
 
     if (!game.init(false)) /// Run the init function of the game class and check it all initialises ok
@@ -46,6 +42,9 @@ int main(void)
         return 0;
     }
 
+#if defined(PLATFORM_WEB)
+    emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
+#else
     /// MAIN GAME LOOP
     while (!WindowShouldClose()) /// Detect window close button or ESC key
     {

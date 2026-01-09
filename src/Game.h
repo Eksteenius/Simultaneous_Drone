@@ -36,6 +36,8 @@ public:
 	void render();
 	void render_ui();
 
+	bool paused = true;
+
 	/// INPUTS
 	void UpdateKeyToggles();
 	std::vector<KeyboardKey> keyPressedMap;
@@ -67,6 +69,7 @@ private:
 
 	
 	/// Inputs
+	std::vector<KeyboardKey> key_pause;
 
 	std::vector<KeyboardKey> key_move_up;
 	std::vector<KeyboardKey> key_move_down;

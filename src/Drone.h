@@ -21,12 +21,18 @@ public:
 
 	/// Pathfinding
 	void moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, float dt);
+
+	Vector2* getTilePathing();
+
+	/// Movement
 	void moveToPoint(Vector2 point, float dt);
 
 	float proximity_distance = 0;
-	int path_progress = -1;
 
 private:
 
+	int path_progress = -1;
+	Vector2 tile_coords = { -1, -1 };
+	bool tile_valid = false;
 };
 
