@@ -151,21 +151,17 @@ void Game::update()
 		//drone.moveToPoint(utils::coordsToGlobal(destination_coords, grid_rect_size), dt);
 	}
 
-	if(IsWindowState(FLAG_WINDOW_MINIMIZED))
-	{
-		paused = true;
-	}
 	if (utils::isKeyVectorReleased(key_pause))
 	{
 		paused = !paused;
 	}
-	//else if (GetKeyPressed() != 0 || utils::isAnyMouseButtonReleased() || GetMouseWheelMove() != 0.0f)
-	//{
-	//	if (utils::isKeyVectorDown(key_pause) != true)
-	//	{
-	//		paused = false;
-	//	}
-	//}
+	else if (GetKeyPressed() != 0 || utils::isAnyMouseButtonReleased() || GetMouseWheelMove() != 0.0f)
+	{
+		if (utils::isKeyVectorDown(key_pause) != true)
+		{
+			paused = false;
+		}
+	}
 }
 
 void Game::render()
