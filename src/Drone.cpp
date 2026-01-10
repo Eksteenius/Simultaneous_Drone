@@ -20,9 +20,6 @@ void Drone::moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, floa
 		/// Pathfinder will set path in use to false when path is reset
 		if (_pathfinder->path_in_use == false)
 		{
-			//proximity_distance = size / 2.f;
-			proximity_distance = 0.5f;
-
 			if (_pathfinder->pathing_solved)
 			{
 				path_progress = _pathfinder->getPath().size() - 1;
@@ -79,14 +76,48 @@ void Drone::moveToPoint(Vector2 point, float dt)
 	Vector2 direction = utils::directionToPoint(position, point);
 	Vector2 unit_direction = utils::unitVector(direction);
 
-	if(utils::magnitude(direction) > utils::magnitude(unit_direction))
+	/// Rotation
+	float direction_angle = fmodf(atan2(direction.y, direction.x) * 180.0f / PI, 360.0f);
+	if (direction_angle < 0) direction_angle += 360.0f;
+
+	if(rotation != direction_angle)
 	{
-		position.x += unit_direction.x * speed * dt;
-		position.y += unit_direction.y * speed * dt;
+		float angle_delta = direction_angle - rotation;
+
+		//// Wrap difference to [-180, 180]
+		//if (angle_delta > 180.0f) angle_delta -= 360.0f;
+		//if (angle_delta < -180.0f) angle_delta += 360.0f;
+
+		if (abs(angle_delta) <= rotation_speed * dt)
+		{
+			rotation = direction_angle;
+		}
+		else
+		{
+			if (angle_delta > 180)
+			{
+				rotation += rotation_speed * dt;
+			}
+			else
+			{
+				rotation -= rotation_speed * dt;
+			}
+
+			rotation = fmodf(rotation, 360.0f);
+			if (rotation < 0) rotation += 360.0f;
+		}
 	}
 	else
 	{
-		position.x += direction.x * speed * dt;
-		position.y += direction.y * speed * dt;
+		/// Movement
+		Vector2 movement = Vector2Scale(unit_direction, speed * dt);
+		if (utils::magnitude(movement) < utils::magnitude(direction))
+		{
+			position = Vector2Add(position, movement);
+		}
+		else
+		{
+			position = point;
+		}
 	}
 }

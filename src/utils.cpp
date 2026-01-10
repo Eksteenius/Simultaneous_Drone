@@ -35,24 +35,29 @@ float utils::randomFromRange(float min, float max)
 	return distr(gen);
 }
 
-int utils::coordsToIndex(int x, int y, int size)
+bool utils::coordsWithinGrid(Vector2 coords, float grid_size)
 {
-	return x + y * size;
+	return (coords.x >= 0 && coords.x < grid_size && coords.y >= 0 && coords.y < grid_size);
 }
 
-int utils::coordsToIndex(Vector2 coords, int size)
+int utils::coordsToIndex(int x, int y, int grid_size)
 {
-	return coords.x + coords.y * size;
+	return x + y * grid_size;
 }
 
-Vector2 utils::globalToCoords(Vector2 global, float size)
+int utils::coordsToIndex(Vector2 coords, int grid_size)
 {
-	return Vector2((int)(global.x / size), (int)(global.y / size));
+	return coords.x + coords.y * grid_size;
 }
 
-Vector2 utils::coordsToGlobal(Vector2 coords, float size)
+Vector2 utils::globalToCoords(Vector2 global, float rect_size)
 {
-	return Vector2(coords.x * size, coords.y * size);
+	return Vector2((int)(global.x / rect_size), (int)(global.y / rect_size));
+}
+
+Vector2 utils::coordsToGlobal(Vector2 coords, float rect_size)
+{
+	return Vector2(coords.x * rect_size, coords.y * rect_size);
 }
 
 float utils::magnitude(Vector2 vector)

@@ -34,7 +34,20 @@ bool Game::init(bool reset)
 	/// Makes grid fit in screen height
 	//grid_rect_size = (float)screenHeight / (float)grid_root_size;
 
-	/// Cell setup for pathfinding
+	/// BUTTONS
+	btn_droning.bounds = Rectangle{ (float)screen_width - 300, 0 * (50 + 10), 300, 50 };
+	btn_droning.text = "Activate Drones";
+	btn_droning.text_size = 30;
+
+	btn_destination.bounds = Rectangle{ (float)screen_width - 300, 1 * (50 + 10), 300, 50 };
+	btn_destination.text = "Place Destination";
+	btn_destination.text_size = 30;
+
+	btn_obstacles.bounds = Rectangle{ (float)screen_width - 300, 2 * (50 + 10), 300, 50 };
+	btn_obstacles.text = "Place Obstacles";
+	btn_obstacles.text_size = 30;
+
+	/// CELLS - setup for pathfinding
 	cells.reserve(grid_root_size * grid_root_size);
 	for (int j = 0; j < grid_root_size; j++)
 	{
@@ -64,7 +77,7 @@ void Game::update()
 		float dt = GetFrameTime();
 
 		/// INPUT
-		UpdateKeyToggles();
+		updateKeyToggles();
 
 		/// WINDOW
 		if (IsKeyPressed(KEY_ESCAPE))
@@ -96,12 +109,13 @@ void Game::update()
 			game_camera->target = { game_camera->target.x + camera_move_speed / game_zoom * dt , game_camera->target.y };
 		}
 
-		game_zoom *= 1 + GetMouseWheelMove() * scrollSpeed;
+		game_zoom *= 1 + GetMouseWheelMove() * scroll_speed;
 		handleZoom(game_camera, game_zoom);
 
 		//ui_zoom *= 1 + GetMouseWheelMove() * scrollSpeed;
 		//handleZoom(ui_camera, ui_zoom);
 
+		/// CURSOR
 		game_mouse_position = { (GetMousePosition().x - game_camera->offset.x) / game_camera->zoom,
 								(GetMousePosition().y - game_camera->offset.y) / game_camera->zoom };
 
@@ -110,14 +124,38 @@ void Game::update()
 
 		world_mouse_position = GetScreenToWorld2D(GetMousePosition(), *game_camera);
 
+		if (btn_destination.clicked)
+		{
+			btn_obstacles.active = false;
+		}
+		if (btn_obstacles.clicked)
+		{
+			btn_destination.active = false;
+		}
+
+		/// BUTTONS
+		btn_droning.update(ui_camera);
+		btn_destination.update(ui_camera);
+		btn_obstacles.update(ui_camera);
+
 		/// CLICK
 		if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
 		{
-			int index = utils::coordsToIndex(hovered_cell, grid_root_size);
-			if (index >= 0 && index < cells.size())
+			
+			if (!utils::coordsWithinGrid(hovered_cell, grid_root_size));
+			else if (btn_destination.active) /// Place destination
 			{
-				cells[index].barrier = !cells[index].barrier;
+				destination_coords = hovered_cell;
 				pathfinder->path_set = false;
+			}
+			else if (btn_obstacles.active) /// Place barriers
+			{
+				int index = utils::coordsToIndex(hovered_cell, grid_root_size);
+				if (index >= 0 && index < cells.size())
+				{
+					cells[index].barrier = !cells[index].barrier;
+					pathfinder->path_set = false;
+				}
 			}
 		}
 
@@ -148,8 +186,11 @@ void Game::update()
 		}
 
 		/// DRONE MOVEMENT
-		drone.moveOnPath(pathfinder, grid_rect_size, dt);
-		//drone.moveToPoint(utils::coordsToGlobal(destination_coords, grid_rect_size), dt);
+		if (btn_droning.active)
+		{
+			drone.moveOnPath(pathfinder, grid_rect_size, dt);
+			//drone.moveToPoint(utils::coordsToGlobal(destination_coords, grid_rect_size), dt);
+		}
 	}
 
 	if(IsWindowMinimized())
@@ -171,7 +212,7 @@ void Game::update()
 
 void Game::render()
 {
-	DrawRectangle(0, 0, screenWidth, screenHeight, GRAY);
+	DrawRectangle(0, 0, screen_width, screen_height, GRAY);
 
 	/// CELLS
 	DrawRectangle(0, 0, grid_root_size * grid_rect_size, grid_root_size * grid_rect_size, DARKGRAY);
@@ -201,48 +242,65 @@ void Game::render()
 				grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(RED, 0.25f));
 		}
 	}
+	{
+		DrawRectangle(destination_coords.x * grid_rect_size + 1, destination_coords.y * grid_rect_size + 1,
+			grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(GREEN, 0.5f));
+	}
 	
-	/// UI
+	/// SELECTED CELL
 	hovered_cell = utils::globalToCoords(world_mouse_position, grid_rect_size);
-	DrawRectangle(hovered_cell.x * grid_rect_size + 1, hovered_cell.y * grid_rect_size + 1,
-		grid_rect_size - 2, grid_rect_size - 2, YELLOW);
+	if (utils::coordsWithinGrid(hovered_cell, grid_root_size))
+	{
+		DrawRectangle(hovered_cell.x * grid_rect_size + 1, hovered_cell.y * grid_rect_size + 1,
+			grid_rect_size - 2, grid_rect_size - 2, YELLOW);
+	}
 
 	/// DRONE
 	DrawRing(drone.center(), drone.size - 4, drone.size, 0, 360, 1, WHITE);
+	DrawPolyLinesEx(drone.center(), 3, drone.size, drone.rotation , 8, WHITE);
+	DrawPolyLinesEx({ drone.center().x + (drone.size - drone.size / 2) * cosf(drone.rotation * PI / 180.0),
+					  drone.center().y + (drone.size - drone.size / 2) * sinf(drone.rotation * PI / 180.0) }, 3, drone.size / 2, drone.rotation, 8, WHITE);
 
 	/// CUSTOM CURSOR
 	//DrawCircle(game_mouse_position.x, game_mouse_position.y, 4, GREEN);
 }
 
-void Game::render_ui()
+void Game::renderUI()
 {
-	DrawCircle(screenWidth / 2.f / ui_zoom, screenHeight / 2.f / ui_zoom, 2, WHITE);
+	/// BUTTONS
+	btn_droning.render();
+	btn_destination.render();
+	btn_obstacles.render();
+
+	/// PAUSE
+	if (paused)
+	{
+		DrawRectangle(0, 0, screen_width, 50, ColorAlpha(BLACK, 0.5f));
+		DrawText("PAUSED: Press any key to continue...", 0, 0, 50, WHITE);
+	}
+
+	/// CENTER
+	DrawCircle(screen_width / 2.f / ui_zoom, screen_height / 2.f / ui_zoom, 2, WHITE);
 
 	/// CUSTOM CURSOR
 	DrawCircle(ui_mouse_position.x, ui_mouse_position.y, 4, RED);
-
-	if (paused)
-	{
-		DrawRectangle(0, 0, screenWidth, 50, ColorAlpha(BLACK, 0.5f));
-		DrawText("PAUSED: Press any key to continue...", 0, 0, 50, WHITE);
-	}
 }
 
-void Game::UpdateKeyToggles()
+void Game::updateKeyToggles()
 {
-	for (auto &pair : keyToggledMap)
+	for (auto &pair : key_toggled_map)
 	{
 		if (IsKeyReleased(pair.first))
 		{
-			keyToggledMap[pair.first] = !pair.second;
+			key_toggled_map[pair.first] = !pair.second;
 		}
 	}
 }
-std::unordered_map<int, bool> Game::keyToggledMap;
+std::unordered_map<int, bool> Game::key_toggled_map;
 
 void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom) 
 { 
-	camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)screenHeight) * zoom; 
+	camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)screen_height) * zoom; 
 }
 
 
@@ -257,3 +315,20 @@ void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom)
 //	camera->offset.y = offset.y - previous_offset.y + (previous_zoom * screenHeight - camera->zoom * screenHeight + offset.y * (previous_zoom - camera->zoom)) / 2;
 //
 //}
+
+/// DRONE DIRECTION INDICATOR
+
+//DrawLineEx({ drone.center().x + drone.size, drone.center().y },
+//	{ drone.position.x + (drone.size / 2 - 6 * std::sqrtf(3)), drone.position.y + (drone.size /2 - 6 * std::sqrtf(3)) }, 4, WHITE);
+//DrawLineEx({ drone.center().x + drone.size, drone.center().y },
+//	{ drone.position.x + (drone.size / 2 - 6 * std::sqrtf(3)), drone.position.y + drone.size * 2 - (drone.size / 2 - 6 * std::sqrtf(3)) }, 4, WHITE);
+//DrawPolyLinesEx(drone.center(), 3, drone.size, 0 , 8, WHITE);
+//DrawLineEx({ drone.center().x + drone.size, drone.center().y }, { drone.center().x - drone.size, drone.center().y}, 4, WHITE);
+//DrawLineEx({ drone.center().x, drone.center().y + drone.size }, { drone.center().x, drone.center().y - drone.size }, 4, WHITE);
+//DrawLineEx({ drone.center().x + drone.size, drone.center().y }, { drone.center().x - (drone.size / 2 * 3) + drone.size, drone.center().y}, 4, WHITE);
+//DrawLineEx({ drone.center().x, drone.center().y + (drone.size / 2 * 3) - drone.size },
+//		   { drone.center().x, drone.center().y - (drone.size / 2 * 3) + drone.size }, 4, WHITE);
+//DrawLineEx({ drone.center().x + ((drone.size / 2 * 3) - drone.size) / 2,
+//	         drone.center().y + (drone.size / 2 * 3) - drone.size - ((drone.size / 2 * 3) - drone.size) / 4 },
+//		   { drone.center().x + ((drone.size / 2 * 3) - drone.size) / 2,
+//	         drone.center().y - (drone.size / 2 * 3) + drone.size + ((drone.size / 2 * 3) - drone.size) / 4 }, 4, WHITE);

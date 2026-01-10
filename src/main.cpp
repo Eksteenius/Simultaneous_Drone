@@ -26,13 +26,13 @@ int main(void)
     std::shared_ptr<Camera2D> game_camera = std::make_shared<Camera2D>();
     game_camera->target = { 0,0 };
     game_camera->rotation = 0.0f;
-    game_camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)Game::screenHeight);
+    game_camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)Game::screen_height);
     game_camera->offset = { 0,0 };
 
     std::shared_ptr<Camera2D> ui_camera = std::make_shared<Camera2D>();
     ui_camera->target = { 0,0 };
     ui_camera->rotation = 0.0f;
-    ui_camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)Game::screenHeight);
+    ui_camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)Game::screen_height);
     ui_camera->offset = { 0,0 };
 
     Game game(game_camera, ui_camera);
@@ -73,7 +73,7 @@ void UpdateDrawFrame(Game& _game, std::shared_ptr<Camera2D> _game_camera, std::s
     EndMode2D();
 
     BeginMode2D(*_ui_camera);
-    _game.render_ui();
+    _game.renderUI();
     EndMode2D();
 
     EndDrawing();
