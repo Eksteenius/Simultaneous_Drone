@@ -284,6 +284,8 @@ void Game::renderUI()
 
 	/// CUSTOM CURSOR
 	DrawCircle(ui_mouse_position.x, ui_mouse_position.y, 4, RED);
+
+	DrawFPS(0, 0);
 }
 
 void Game::updateKeyToggles()

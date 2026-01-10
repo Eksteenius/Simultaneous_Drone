@@ -76,38 +76,34 @@ void Drone::moveToPoint(Vector2 point, float dt)
 	Vector2 direction = utils::directionToPoint(position, point);
 	Vector2 unit_direction = utils::unitVector(direction);
 
-	/// Rotation
 	float direction_angle = fmodf(atan2(direction.y, direction.x) * 180.0f / PI, 360.0f);
-	if (direction_angle < 0) direction_angle += 360.0f;
+	if (direction_angle < 0) direction_angle += 360;
 
+	
 	if(rotation != direction_angle)
 	{
-		float angle_delta = direction_angle - rotation;
+		/// Rotation
+		float rotation_delta = direction_angle - rotation;
+		if (rotation_delta > 180.0f) rotation_delta -= 360.0f;
+		if (rotation_delta < -180.0f) rotation_delta += 360.0f;
 
-		//// Wrap difference to [-180, 180]
-		//if (angle_delta > 180.0f) angle_delta -= 360.0f;
-		//if (angle_delta < -180.0f) angle_delta += 360.0f;
-
-		if (abs(angle_delta) <= rotation_speed * dt)
+		if (abs(rotation_delta) <= rotation_speed * dt)
 		{
 			rotation = direction_angle;
 		}
+		else if (rotation_delta > 0)
+		{
+			rotation = fmodf(rotation + rotation_speed * dt, 360.f);
+		}
 		else
 		{
-			if (angle_delta > 180)
-			{
-				rotation += rotation_speed * dt;
-			}
-			else
-			{
-				rotation -= rotation_speed * dt;
-			}
-
-			rotation = fmodf(rotation, 360.0f);
-			if (rotation < 0) rotation += 360.0f;
+			rotation = fmodf(rotation - rotation_speed * dt, 360.f);
 		}
+
+		if (rotation < 0) rotation += 360;
 	}
-	else
+	
+	if(rotation == direction_angle)
 	{
 		/// Movement
 		Vector2 movement = Vector2Scale(unit_direction, speed * dt);
