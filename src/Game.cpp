@@ -124,24 +124,18 @@ void Game::update()
 
 		world_mouse_position = GetScreenToWorld2D(GetMousePosition(), *game_camera);
 
-		if (btn_destination.clicked)
-		{
-			btn_obstacles.active = false;
-		}
-		if (btn_obstacles.clicked)
-		{
-			btn_destination.active = false;
-		}
-
 		/// BUTTONS
 		btn_droning.update(ui_camera);
 		btn_destination.update(ui_camera);
 		btn_obstacles.update(ui_camera);
 
+		if (btn_droning.clicked);
+		else if (btn_destination.clicked) btn_obstacles.active = false;
+		else if (btn_obstacles.clicked) btn_destination.active = false;
+
 		/// CLICK
-		if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+		else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
 		{
-			
 			if (!utils::coordsWithinGrid(hovered_cell, grid_root_size));
 			else if (btn_destination.active) /// Place destination
 			{
@@ -173,7 +167,7 @@ void Game::update()
 			else
 			{
 				pathfinder->setStartEndIndex(
-					utils::coordsToIndex(utils::globalToCoords(drone.position, grid_rect_size), grid_root_size),
+					utils::coordsToIndex(utils::globalToCoords(drone.center(), grid_rect_size), grid_root_size),
 					utils::coordsToIndex(destination_coords, grid_root_size));
 			}
 

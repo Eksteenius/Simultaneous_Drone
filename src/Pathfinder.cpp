@@ -28,7 +28,7 @@ void Pathfinder::AStar()
                 });
 
             Cell& current_cell = open_set.back();
-            current_cell.neighbors = open_set.back().get().neighbors;
+            //current_cell.neighbors = open_set.back().get().neighbors;
 
             if (current_cell == cells[end_cell_index])
             {
