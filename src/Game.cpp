@@ -174,9 +174,13 @@ void Game::update()
 
 		}
 
-		while (!pathfinder->pathing_complete)
 		{
-			pathfinder->AStar();
+			int i = 0;
+			while (!pathfinder->pathing_complete && i < 50)
+			{
+				pathfinder->AStar();
+				i++;
+			}
 		}
 
 		/// DRONE MOVEMENT

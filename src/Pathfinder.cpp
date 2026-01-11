@@ -30,12 +30,13 @@ void Pathfinder::AStar()
             Cell& current_cell = open_set.back();
             //current_cell.neighbors = open_set.back().get().neighbors;
 
+            /// Pathing solved
             if (current_cell == cells[end_cell_index])
             {
                 pathing_complete = true;
                 pathing_solved = true;
 
-                /// Find the path 
+                /// Create solved path
                 path = {};
                 Cell* temp_current = &current_cell;
                 path.push_back(*temp_current);
@@ -45,6 +46,9 @@ void Pathfinder::AStar()
                     path.push_back(*temp_current->previous);
                     temp_current = temp_current->previous;
                 }
+
+                last_solved_path = path;
+                path_in_use = false;
             }
             else
             {
@@ -120,15 +124,41 @@ void Pathfinder::AStar()
         }
         else
         {
-            /// No solution
+            /// No pathing solution
             pathing_complete = true;
             pathing_solved = false;
-        }
-    }
 
-    if(pathing_solved)
-    {
-        last_solved_path = path;
+            // Find closest cell in closed_set
+            Cell* closest = nullptr;
+            float min_distance = std::numeric_limits<float>::max();
+
+            for (Cell& cell : closed_set)
+            {
+                float dist = heuristic(cells[start_cell_index], cell, cells[end_cell_index]);
+                if (dist < min_distance)
+                {
+                    min_distance = dist;
+                    closest = &cell;
+                }
+            }
+
+            if (closest != nullptr)
+            {
+                /// Create closest solved path
+                path = {};
+                Cell* temp_current = closest;
+                path.push_back(*temp_current);
+
+                while (temp_current->previous != nullptr)
+                {
+                    path.push_back(*temp_current->previous);
+                    temp_current = temp_current->previous;
+                }
+            }
+
+            last_solved_path = path;
+            path_in_use = false;
+        }
     }
 }
 
