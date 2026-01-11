@@ -18,10 +18,8 @@ void Pathfinder::AStar()
     }
     else if (path_set == true)
     {
-        if (open_set.size() > 0)
+        if (!open_set.empty())
         {
-            //int lowestIndex = 0;
-
             std::sort(open_set.begin(), open_set.end(), [](const Cell& a, const Cell& b) {
                 if (a.f != b.f) {
                     return a.f > b.f;  // Sort by largest f values first
@@ -29,26 +27,8 @@ void Pathfinder::AStar()
                 return a.g < b.g;  // Sort by smallest g value first when f is equal
                 });
 
-            //for (int i = 0; i < open_set.size(); i++)
-            //{
-            //    if (open_set.at(i).get().f < open_set.at(lowestIndex).get().f)
-            //    {
-            //        lowestIndex = i;
-            //    } 
-            //    else if (open_set.at(i).get().f == open_set.at(lowestIndex).get().f)
-            //    {
-            //        if (open_set.at(i).get().g > open_set.at(lowestIndex).get().g)
-            //        {
-            //            lowestIndex = i;
-            //        }
-            //    }
-            //}
-
-            //Cell& current_cell = open_set.at(lowestIndex);
-            //current_cell.neighbors = open_set.at(lowestIndex).get().neighbors;
-
-            Cell& current_cell = open_set[open_set.size() - 1];
-            current_cell.neighbors = open_set[open_set.size() - 1].get().neighbors;
+            Cell& current_cell = open_set.back();
+            current_cell.neighbors = open_set.back().get().neighbors;
 
             if (current_cell == cells[end_cell_index])
             {
@@ -69,7 +49,6 @@ void Pathfinder::AStar()
             else
             {
                 //open_set.remove(current_cell);
-                //open_set.erase(open_set.begin() + lowestIndex);
                 open_set.pop_back();
 
                 closed_set.push_back(current_cell);
