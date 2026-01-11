@@ -61,7 +61,7 @@ private:
 	
 
 	/// Cells
-	int grid_root_size = 16;
+	int grid_root_size = 100;
 	float grid_rect_size = 100;
 	std::vector<Cell> cells;
 

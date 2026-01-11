@@ -2,6 +2,8 @@
 #ifndef RAVINES_PATHFINDER_H
 #define RAVINES_PATHFINDER_H
 
+#include <algorithm>
+
 #include "Cell.h"
 
 class Pathfinder

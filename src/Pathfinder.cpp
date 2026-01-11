@@ -20,46 +20,57 @@ void Pathfinder::AStar()
     {
         if (open_set.size() > 0)
         {
-            int lowestIndex = 0;
+            //int lowestIndex = 0;
 
-            for (int i = 0; i < open_set.size(); i++)
-            {
-                if (open_set.at(i).get().f < open_set.at(lowestIndex).get().f)
-                {
-                    lowestIndex = i;
-                } 
-                else if (open_set.at(i).get().f == open_set.at(lowestIndex).get().f)
-                {
-                    if (open_set.at(i).get().g > open_set.at(lowestIndex).get().g)
-                    {
-                        lowestIndex = i;
-                    }
+            std::sort(open_set.begin(), open_set.end(), [](const Cell& a, const Cell& b) {
+                if (a.f != b.f) {
+                    return a.f > b.f;  // Sort by largest f values first
                 }
-            }
+                return a.g < b.g;  // Sort by smallest g value first when f is equal
+                });
 
-            Cell& current_cell = open_set.at(lowestIndex);
-            current_cell.neighbors = open_set.at(lowestIndex).get().neighbors;
+            //for (int i = 0; i < open_set.size(); i++)
+            //{
+            //    if (open_set.at(i).get().f < open_set.at(lowestIndex).get().f)
+            //    {
+            //        lowestIndex = i;
+            //    } 
+            //    else if (open_set.at(i).get().f == open_set.at(lowestIndex).get().f)
+            //    {
+            //        if (open_set.at(i).get().g > open_set.at(lowestIndex).get().g)
+            //        {
+            //            lowestIndex = i;
+            //        }
+            //    }
+            //}
 
-            /// find the path 
-            path = {};
-            Cell* temp_current = &current_cell;
-            path.push_back(*temp_current);
+            //Cell& current_cell = open_set.at(lowestIndex);
+            //current_cell.neighbors = open_set.at(lowestIndex).get().neighbors;
 
-            while (temp_current->previous != nullptr)
-            {
-                path.push_back(*temp_current->previous);
-                temp_current = temp_current->previous;
-            }
+            Cell& current_cell = open_set[open_set.size() - 1];
+            current_cell.neighbors = open_set[open_set.size() - 1].get().neighbors;
 
             if (current_cell == cells[end_cell_index])
             {
                 pathing_complete = true;
                 pathing_solved = true;
+
+                /// Find the path 
+                path = {};
+                Cell* temp_current = &current_cell;
+                path.push_back(*temp_current);
+
+                while (temp_current->previous != nullptr)
+                {
+                    path.push_back(*temp_current->previous);
+                    temp_current = temp_current->previous;
+                }
             }
             else
             {
-                /// this is the same as: open_set.remove(current_cell);
-                open_set.erase(open_set.begin() + lowestIndex);
+                //open_set.remove(current_cell);
+                //open_set.erase(open_set.begin() + lowestIndex);
+                open_set.pop_back();
 
                 closed_set.push_back(current_cell);
 
@@ -116,6 +127,7 @@ void Pathfinder::AStar()
 
                                 open_set.push_back(neighbor);
                             }
+
                             if (new_path == true)
                             {
                                 neighbor.h = heuristic(current_cell, neighbor, cells[end_cell_index]);
@@ -129,7 +141,7 @@ void Pathfinder::AStar()
         }
         else
         {
-            /// no solution
+            /// No solution
             pathing_complete = true;
             pathing_solved = false;
         }
