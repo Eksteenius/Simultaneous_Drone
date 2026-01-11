@@ -25,53 +25,63 @@ void Drone::moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, floa
 				path_progress = _pathfinder->getPath().size() - 1;
 			}
 			_pathfinder->path_in_use = true;
+
+			setPathing(_pathfinder, path_progress);
 		}
 
-		tile_coords = { -1, -1 };
-		tile_valid = false;
-
-		if (_pathfinder->pathing_solved && _pathfinder->getPath()[path_progress].get().barrier == false)
+		if (path_valid)
 		{
-			tile_coords = Vector2(_pathfinder->getPath()[path_progress].get().i, _pathfinder->getPath()[path_progress].get().j);
-			tile_valid = true;
-		}
-		else if (_pathfinder->getLastSolvedPath().size() > 0 && _pathfinder->getLastSolvedPath()[path_progress].get().barrier == false)
-		{
-			tile_coords = Vector2(_pathfinder->getLastSolvedPath()[path_progress].get().i, _pathfinder->getLastSolvedPath()[path_progress].get().j);
-			tile_valid = true;
-		}
-
-		if (tile_valid)
-		{
-			Vector2 coords = Vector2(tile_coords.x * size, tile_coords.y * size);
-
+			Vector2 coords = Vector2(path_coords.x * size, path_coords.y * size);
 			Vector2 distance = { coords.x - position.x, coords.y - position.y };
 
 			if (std::abs(utils::magnitude(distance)) > proximity_distance)
 			{
-				moveToPoint(coords, dt);
+				moveToPoint(coords, speed * dt, dt);
+			}
+			else if (path_progress > 0) /// Within proximity
+			{
+				path_progress--;
+
+				/// Set next tile 
+				setPathing(_pathfinder, path_progress);
+
+				/// move using remaining speed to prevent abrupt stops when reaching proximity distance
+				float unused_movement = (speed * dt) - (proximity_distance - utils::magnitude(distance));
+				if (unused_movement > 0)
+				{
+					coords = Vector2(path_coords.x * size, path_coords.y * size);
+					moveToPoint(coords, unused_movement, dt);
+				}
 			}
 			else
 			{
-				if (path_progress > 0)
-				{
-					path_progress--;
-				}
+				path_valid = false; /// there are no tiles left for pathfinding
 			}
 		}
 	}
 }
 
-Vector2* Drone::getTilePathing()
+Vector2 Drone::getCurrentPathing()
 {
-	if (tile_valid)
-	{
-		return &tile_coords;
-	}
-	return nullptr;
+	return path_coords;
 }
 
-void Drone::moveToPoint(Vector2 point, float dt)
+void Drone::setPathing(std::shared_ptr<Pathfinder> _pathfinder, int index)
+{
+	path_valid = false;
+	if (_pathfinder->pathing_solved && _pathfinder->getPath()[path_progress].get().barrier == false)
+	{
+		path_coords = Vector2(_pathfinder->getPath()[path_progress].get().i, _pathfinder->getPath()[path_progress].get().j);
+		path_valid = true;
+	}
+	else if (_pathfinder->getLastSolvedPath().size() > 0 && _pathfinder->getLastSolvedPath()[path_progress].get().barrier == false)
+	{
+		path_coords = Vector2(_pathfinder->getLastSolvedPath()[path_progress].get().i, _pathfinder->getLastSolvedPath()[path_progress].get().j);
+		path_valid = true;
+	}
+}
+
+void Drone::moveToPoint(Vector2 point, float amount, float dt)
 {
 	Vector2 direction = utils::directionToPoint(position, point);
 	Vector2 unit_direction = utils::unitVector(direction);
@@ -84,14 +94,15 @@ void Drone::moveToPoint(Vector2 point, float dt)
 	{
 		/// Rotation
 		float rotation_delta = direction_angle - rotation;
+		/// Wrap difference within [-180, 180]
 		if (rotation_delta > 180.0f) rotation_delta -= 360.0f;
-		if (rotation_delta < -180.0f) rotation_delta += 360.0f;
+		else if (rotation_delta < -180.0f) rotation_delta += 360.0f;
 
 		if (abs(rotation_delta) <= rotation_speed * dt)
 		{
 			rotation = direction_angle;
 		}
-		else if (rotation_delta > 0)
+		else if (rotation_delta >= 0)
 		{
 			rotation = fmodf(rotation + rotation_speed * dt, 360.f);
 		}
@@ -106,7 +117,7 @@ void Drone::moveToPoint(Vector2 point, float dt)
 	if(rotation == direction_angle)
 	{
 		/// Movement
-		Vector2 movement = Vector2Scale(unit_direction, speed * dt);
+		Vector2 movement = Vector2Scale(unit_direction, amount);
 		if (utils::magnitude(movement) < utils::magnitude(direction))
 		{
 			position = Vector2Add(position, movement);

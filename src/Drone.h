@@ -17,8 +17,7 @@ public:
 	Vector2 center();
 
 	/// Movement
-	void moveToPoint(Vector2 point, float dt);
-	
+	void moveToPoint(Vector2 point, float amount, float dt);
 	/// Pathfinding
 	void moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, float dt);
 
@@ -28,18 +27,15 @@ public:
 	float speed = 500;
 	float rotation_speed = 180;
 
-	float proximity_distance = 0.0f;
+	float proximity_distance = 5.0f;
 
-	Vector2* getTilePathing();
-
-
-
-	
+	Vector2 getCurrentPathing();
+	bool path_valid = false;
 
 private:
+	void setPathing(std::shared_ptr<Pathfinder> _pathfinder, int index);
 
 	int path_progress = -1;
-	Vector2 tile_coords = { -1, -1 };
-	bool tile_valid = false;
+	Vector2 path_coords = { 0, 0 };
 };
 

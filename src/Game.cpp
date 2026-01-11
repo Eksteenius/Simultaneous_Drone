@@ -163,11 +163,11 @@ void Game::update()
 
 		if (!pathfinder->path_set)
 		{
-			Vector2* drone_tile = drone.getTilePathing();
-			if (drone_tile != nullptr)
+			Vector2 drone_pathing_coords = drone.getCurrentPathing();
+			if (drone.path_valid)
 			{
 				pathfinder->setStartEndIndex(
-					utils::coordsToIndex(*drone_tile, grid_root_size),
+					utils::coordsToIndex(drone_pathing_coords, grid_root_size),
 					utils::coordsToIndex(destination_coords, grid_root_size));
 			}
 			else
@@ -218,14 +218,17 @@ void Game::render()
 	DrawRectangle(0, 0, grid_root_size * grid_rect_size, grid_root_size * grid_rect_size, DARKGRAY);
 	for (Cell& cell : cells)
 	{
+		/// GRID
 		DrawRectangleLines((cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size, WHITE);
 
+		/// BARRIER
 		if (cell.barrier == true)
 		{
 			DrawRectangle((cell.i * grid_rect_size) + 1, (cell.j * grid_rect_size) + 1,
 				grid_rect_size - 2, grid_rect_size - 2, BLACK);
 		}
 	}
+	/// PATH
 	if (pathfinder->pathing_solved)
 	{
 		for (Cell& cell : pathfinder->getLastSolvedPath())
@@ -242,10 +245,17 @@ void Game::render()
 				grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(RED, 0.25f));
 		}
 	}
+	/// DESTINATION
+	DrawRectangle(destination_coords.x * grid_rect_size + 1, destination_coords.y * grid_rect_size + 1,
+		grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(GREEN, 0.5f));
+
+	Vector2 drone_pathing = utils::coordsToGlobal(drone.getCurrentPathing(), grid_rect_size);
+	if(drone.proximity_distance >= 1)
 	{
-		DrawRectangle(destination_coords.x * grid_rect_size + 1, destination_coords.y * grid_rect_size + 1,
-			grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(GREEN, 0.5f));
+		DrawCircleLines(drone_pathing.x + grid_rect_size / 2, drone_pathing.y + grid_rect_size / 2,
+			drone.proximity_distance, ColorAlpha(GREEN, 0.5f));
 	}
+
 	
 	/// SELECTED CELL
 	hovered_cell = utils::globalToCoords(world_mouse_position, grid_rect_size);
@@ -257,6 +267,7 @@ void Game::render()
 
 	/// DRONE
 	DrawRing(drone.center(), drone.size - 4, drone.size, 0, 360, 1, WHITE);
+	DrawCircle(drone.center().x, drone.center().y, 4, WHITE);
 	DrawPolyLinesEx(drone.center(), 3, drone.size, drone.rotation , 8, WHITE);
 	DrawPolyLinesEx({ drone.center().x + (drone.size - drone.size / 2) * cosf(drone.rotation * PI / 180.0),
 					  drone.center().y + (drone.size - drone.size / 2) * sinf(drone.rotation * PI / 180.0) }, 3, drone.size / 2, drone.rotation, 8, WHITE);
