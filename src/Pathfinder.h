@@ -28,7 +28,7 @@ public:
     std::vector<std::reference_wrapper<Cell>>& getLastSolvedPath();
 
     bool path_set = false;
-    int search_iterations = 200;
+    int search_iterations = -1;
     bool pathing_complete = false;
     bool pathing_solved = false;
 

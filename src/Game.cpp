@@ -154,17 +154,16 @@ void Game::update()
 		}
 
 		/// PATHFINDING
-
 		if (!pathfinder->path_set)
 		{
-			Vector2 drone_pathing_coords = drone.getCurrentPathing();
-			if (drone.path_valid)
-			{
-				pathfinder->setStartEndIndex(
-					utils::coordsToIndex(drone_pathing_coords, grid_root_size),
-					utils::coordsToIndex(destination_coords, grid_root_size));
-			}
-			else
+			//Vector2 drone_pathing_coords = drone.getCurrentPathing();
+			//if (drone.path_valid)
+			//{
+			//	pathfinder->setStartEndIndex(
+			//		utils::coordsToIndex(drone_pathing_coords, grid_root_size),
+			//		utils::coordsToIndex(destination_coords, grid_root_size));
+			//}
+			//else
 			{
 				pathfinder->setStartEndIndex(
 					utils::coordsToIndex(utils::globalToCoords(drone.center(), grid_rect_size), grid_root_size),
@@ -173,13 +172,13 @@ void Game::update()
 
 
 		}
-
+		/// PATHFIND SOLVING
 		{
-			int i = 0;
-			while (!pathfinder->pathing_complete && i < 50)
+			//int i = 0;
+			while (!pathfinder->pathing_complete) //&& (pathfinder->search_iterations < 0 || i < pathfinder->search_iterations / 10))
 			{
 				pathfinder->AStar();
-				i++;
+				//i++;
 			}
 		}
 
@@ -218,40 +217,93 @@ void Game::render()
 	{
 		/// GRID
 		DrawRectangleLines((cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size, WHITE);
+		//DrawRectangleLinesEx({ (cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size }, 1, WHITE);
 
 		/// BARRIER
 		if (cell.barrier == true)
 		{
-			DrawRectangle((cell.i * grid_rect_size) + 1, (cell.j * grid_rect_size) + 1,
-				grid_rect_size - 2, grid_rect_size - 2, BLACK);
+			//DrawRectangle((cell.i * grid_rect_size) + 1, (cell.j * grid_rect_size) + 1,grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(BLACK, 0.25f));
+			//DrawRectangleLinesEx({ (cell.i * grid_rect_size) + 2, (cell.j * grid_rect_size) + 2, grid_rect_size - 4, grid_rect_size - 4 }, 8, BLACK);
+
+			Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+			DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(BLACK, 0.25f));
+			DrawRing(cell_center,grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, BLACK);
 		}
 	}
-	/// PATH
+
+	/// SEARCHED CELLS
+	if (pathfinder->pathing_complete)
+	{
+		for (Cell& cell : pathfinder->getClosedSet())
+		{
+			if ((pathfinder->pathing_solved && 
+				std::find(pathfinder->getPath().begin(), pathfinder->getPath().end(), cell) == pathfinder->getPath().end()) ||
+				((pathfinder->getLastSolvedPath().size() > 0) && 
+					std::find(pathfinder->getLastSolvedPath().begin(), pathfinder->getLastSolvedPath().end(), cell) == pathfinder->getLastSolvedPath().end()))
+			{
+				//DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
+				//	grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(DARKBLUE, 0.25f));
+				//DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
+				//	grid_rect_size - 4, grid_rect_size - 4 }, 4, DARKBLUE);
+
+				Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+				DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(DARKBLUE, 0.25f));
+				DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, DARKBLUE);
+			}
+		}
+	}
+
+
+	/// SOLVED PATH
 	if (pathfinder->pathing_solved)
 	{
-		for (Cell& cell : pathfinder->getLastSolvedPath())
+		for (int i = 1; i < pathfinder->getPath().size(); i++)
 		{
-			DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
-				grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(BLUE, 0.25f));
+			const Cell& cell = pathfinder->getPath()[i];
+			//DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
+			//	grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(Color(50,255,255,255), 0.25f));
+			//DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
+			//	grid_rect_size - 4, grid_rect_size - 4 }, 4, Color(100,255,255,255));
+
+			Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+			DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(Color(50, 255, 255, 255), 0.25f));
+			DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(100, 255, 255, 255));
 		}
 	}
+	/// UNSOLVED PATH
 	else if (pathfinder->getLastSolvedPath().size() > 0)
 	{
 		for (Cell& cell : pathfinder->getLastSolvedPath())
 		{
-			DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
-				grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(RED, 0.25f));
+			//DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
+			//	grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(RED, 0.25f));
+			//DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
+			//	grid_rect_size - 4, grid_rect_size - 4 }, 4, Color(255, 0, 0, 255));
+
+			Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+			DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(RED, 0.25f));
+			DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(255, 0, 0, 255));
 		}
 	}
-	/// DESTINATION
-	DrawRectangle(destination_coords.x * grid_rect_size + 1, destination_coords.y * grid_rect_size + 1,
-		grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(GREEN, 0.5f));
 
+	/// DESTINATION
+	{
+		//DrawRectangle(destination_coords.x * grid_rect_size + 1, destination_coords.y * grid_rect_size + 1,
+		//	grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(GREEN, 0.25f));
+		//DrawRectangleLinesEx({ destination_coords.x * grid_rect_size + 2, destination_coords.y * grid_rect_size + 2,
+		//	grid_rect_size - 4, grid_rect_size - 4 }, 4, Color(0, 255, 0, 255));
+
+		Vector2 cell_center = utils::center(utils::coordsToGlobal(destination_coords, grid_rect_size), grid_rect_size);
+		DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(GREEN, 0.25f));
+		DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(0, 255, 0, 255));
+	}
+
+	/// PROXIMITY PATHING
 	Vector2 drone_pathing = utils::coordsToGlobal(drone.getCurrentPathing(), grid_rect_size);
 	if(drone.proximity_distance >= 1)
 	{
 		DrawCircleLines(drone_pathing.x + grid_rect_size / 2, drone_pathing.y + grid_rect_size / 2,
-			drone.proximity_distance, ColorAlpha(GREEN, 0.5f));
+			drone.proximity_distance, ColorAlpha(GREEN, 1));
 	}
 
 	
@@ -260,7 +312,9 @@ void Game::render()
 	if (utils::coordsWithinGrid(hovered_cell, grid_root_size))
 	{
 		DrawRectangle(hovered_cell.x * grid_rect_size + 1, hovered_cell.y * grid_rect_size + 1,
-			grid_rect_size - 2, grid_rect_size - 2, YELLOW);
+			grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(YELLOW, 0.5f));
+		DrawRectangleLinesEx({ hovered_cell.x * grid_rect_size + 2, hovered_cell.y * grid_rect_size + 2,
+			grid_rect_size - 4, grid_rect_size - 4 }, 4, YELLOW);
 	}
 
 	/// DRONE
@@ -326,6 +380,7 @@ void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom)
 //	camera->offset.y = offset.y - previous_offset.y + (previous_zoom * screenHeight - camera->zoom * screenHeight + offset.y * (previous_zoom - camera->zoom)) / 2;
 //
 //}
+
 
 /// DRONE DIRECTION INDICATOR
 

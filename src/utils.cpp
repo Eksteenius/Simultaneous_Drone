@@ -60,6 +60,11 @@ Vector2 utils::coordsToGlobal(Vector2 coords, float rect_size)
 	return Vector2(coords.x * rect_size, coords.y * rect_size);
 }
 
+Vector2 utils::center(Vector2 position, float size)
+{
+	return Vector2(position.x + size / 2.f, position.y + size / 2.f);
+}
+
 float utils::magnitude(Vector2 vector)
 {
 	return std::sqrtf(std::powf((vector.x), 2) + std::powf((vector.y), 2));

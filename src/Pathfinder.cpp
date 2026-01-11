@@ -18,7 +18,7 @@ void Pathfinder::AStar()
     }
     else if (path_set == true)
     {
-        if (!open_set.empty() && closed_set.size() < search_iterations)
+        if (!open_set.empty() && (search_iterations < 0 || closed_set.size() < search_iterations))
         {
             std::sort(open_set.begin(), open_set.end(), [](const Cell& a, const Cell& b) {
                 if (a.f != b.f) {
@@ -130,15 +130,15 @@ void Pathfinder::AStar()
 
             // Find closest cell in closed_set
             Cell* closest = nullptr;
-            float min_distance = std::numeric_limits<float>::max();
+            float smallest_dist = std::numeric_limits<float>::max();
 
             for (Cell& cell : closed_set)
             {
                 //float dist = heuristic(cells[start_cell_index], cell, cells[end_cell_index]);
                 float dist = utils::magnitude(utils::directionToPoint({ (float)cell.i, (float)cell.j }, { (float)cells[end_cell_index].i, (float)cells[end_cell_index].j }));
-                if (dist < min_distance)
+                if (dist < smallest_dist)
                 {
-                    min_distance = dist;
+                    smallest_dist = dist;
                     closest = &cell;
                 }
             }
