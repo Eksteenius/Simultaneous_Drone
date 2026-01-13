@@ -116,8 +116,8 @@ void Game::update()
 		//handleZoom(ui_camera, ui_zoom);
 
 		/// CURSOR
-		game_mouse_position = { (GetMousePosition().x - game_camera->offset.x) / game_camera->zoom,
-								(GetMousePosition().y - game_camera->offset.y) / game_camera->zoom };
+		//game_mouse_position = { (GetMousePosition().x - game_camera->offset.x) / game_camera->zoom,
+		//						(GetMousePosition().y - game_camera->offset.y) / game_camera->zoom };
 
 		ui_mouse_position = { (GetMousePosition().x - ui_camera->offset.x) / ui_camera->zoom,
 							  (GetMousePosition().y - ui_camera->offset.y) / ui_camera->zoom };
@@ -153,8 +153,8 @@ void Game::update()
 		}
 		else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
 		{
-			if (!utils::coordsWithinGrid(hovered_cell, grid_root_size));
-			else if (btn_destination.active) /// Place destination
+			if (utils::coordsWithinGrid(hovered_cell, grid_root_size) && 
+				btn_destination.active) /// Place destination
 			{
 				destination_coords = hovered_cell;
 				pathfinder->path_set = false;
@@ -357,6 +357,22 @@ void Game::render()
 			grid_rect_size - 4, grid_rect_size - 4 }, 4, YELLOW);
 	}
 
+	/// RAYCASTING
+	std::unique_ptr<Vector2> collision = raycastCellCollision(drone.center(), world_mouse_position, 50000);
+	if(collision != nullptr)
+	{
+		DrawCircleLines(collision->x, collision->y, 10, RED);
+		DrawLine(drone.center().x, drone.center().y,
+			world_mouse_position.x,
+			world_mouse_position.y, RED);
+	}
+	else
+	{
+		DrawLine(drone.center().x, drone.center().y,
+			world_mouse_position.x,
+			world_mouse_position.y, WHITE);
+	}
+
 	/// DRONE
 	DrawRing(drone.center(), drone.size - 4, drone.size, 0, 360, 1, WHITE);
 	DrawCircle(drone.center().x, drone.center().y, 4, WHITE);
@@ -406,6 +422,76 @@ std::unordered_map<int, bool> Game::key_toggled_map;
 void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom) 
 { 
 	camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)screen_height) * zoom; 
+}
+
+std::unique_ptr<Vector2> Game::raycastCellCollision(Vector2 start, Vector2 end, float length)
+{
+	Vector2 ray_start = start;
+	Vector2 ray_direction = Vector2Normalize(Vector2Subtract(end, start));
+
+	Vector2 unit_step_size = { abs(1.0f / ray_direction.x), abs(1.0f / ray_direction.y) };
+
+	Vector2 cell_coords_check = utils::globalToCoords(ray_start, grid_rect_size);
+	Vector2 unit_ray_length;
+
+	Vector2 step;
+
+	if (ray_direction.x < 0)
+	{
+		step.x = -1;
+		unit_ray_length.x = (ray_start.x - cell_coords_check.x) * unit_step_size.x;
+	}
+	else
+	{
+		step.x = 1;
+		unit_ray_length.x = ((int)(cell_coords_check.x + 1.0f) - ray_start.x) * unit_step_size.x;
+	}
+
+	if (ray_direction.y < 0)
+	{
+		step.y = -1;
+		unit_ray_length.y = (ray_start.y - cell_coords_check.y) * unit_step_size.y;
+	}
+	else
+	{
+		step.y = 1;
+		unit_ray_length.y = ((int)(cell_coords_check.y + 1.0f) - ray_start.y) * unit_step_size.y;
+	}
+
+	bool cell_found = false;
+	float distance = 0;
+
+	while (!cell_found && distance * grid_rect_size <= length)
+	{
+		/// Walk
+		if (unit_ray_length.x < unit_ray_length.y)
+		{
+			cell_coords_check.x += step.x;
+			distance = unit_ray_length.x;
+			unit_ray_length.x += unit_step_size.x;
+		}
+		else
+		{
+			cell_coords_check.y += step.y;
+			distance = unit_ray_length.y;
+			unit_ray_length.y += unit_step_size.y;
+		}
+
+		if (utils::coordsWithinGrid(cell_coords_check, grid_root_size) &&
+			cells[utils::coordsToIndex(cell_coords_check, grid_root_size)].barrier)
+		{
+			cell_found = true;
+		}
+	}
+
+	Vector2 intersection;
+	if (cell_found)
+	{
+		intersection = Vector2Add(ray_start, Vector2Scale(ray_direction, distance));
+		return std::make_unique<Vector2>(intersection);
+	}
+
+	return nullptr;
 }
 
 

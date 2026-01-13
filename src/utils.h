@@ -28,6 +28,7 @@ namespace utils
 	float magnitude(Vector2 vector);
 	Vector2 unitVector(Vector2 vector);
 	Vector2 directionToPoint(Vector2 position, Vector2 point);
+	float AngleFromVector(Vector2 vector);
 
 	/// Check if any of multiple keys are down
 	bool isKeyVectorDown(std::vector<KeyboardKey> keys);

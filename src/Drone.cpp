@@ -90,7 +90,7 @@ void Drone::moveToPoint(Vector2 point, float amount, float dt)
 	Vector2 direction = utils::directionToPoint(position, point);
 	Vector2 unit_direction = utils::unitVector(direction);
 
-	float direction_angle = fmodf(atan2(direction.y, direction.x) * 180.0f / PI, 360.0f);
+	float direction_angle = utils::AngleFromVector(direction);
 	if (direction_angle < 0) direction_angle += 360;
 
 	

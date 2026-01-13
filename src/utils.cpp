@@ -51,7 +51,7 @@ int utils::coordsToIndex(int x, int y, int grid_size)
 
 int utils::coordsToIndex(Vector2 coords, int grid_size)
 {
-	return coords.x + coords.y * grid_size;
+	return (int)coords.x + (int)coords.y * grid_size;
 }
 
 Vector2 utils::globalToCoords(Vector2 global, float rect_size)
@@ -61,7 +61,7 @@ Vector2 utils::globalToCoords(Vector2 global, float rect_size)
 
 Vector2 utils::coordsToGlobal(Vector2 coords, float rect_size)
 {
-	return Vector2(coords.x * rect_size, coords.y * rect_size);
+	return Vector2((int)coords.x * rect_size, (int)coords.y * rect_size);
 }
 
 Vector2 utils::center(Vector2 position, float size)
@@ -83,6 +83,11 @@ Vector2 utils::unitVector(Vector2 vector)
 Vector2 utils::directionToPoint(Vector2 position, Vector2 point)
 {
 	return Vector2(point.x - position.x, point.y - position.y);
+}
+
+float utils::AngleFromVector(Vector2 vector)
+{
+	return fmodf(atan2(vector.y, vector.x) * 180.0f / PI, 360.0f);
 }
 
 bool utils::isKeyVectorDown(std::vector<KeyboardKey> keys)

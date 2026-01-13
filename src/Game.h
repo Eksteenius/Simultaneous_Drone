@@ -45,11 +45,13 @@ public:
 	static std::unordered_map<int, bool> key_toggled_map;
 
 	float scroll_speed = 0.05f;
-	Vector2 game_mouse_position;
+	//Vector2 game_mouse_position;
 	Vector2 ui_mouse_position;
 	Vector2 world_mouse_position;
 
 	void handleZoom(std::shared_ptr<Camera2D> camera, float zoom);
+
+	std::unique_ptr<Vector2> raycastCellCollision(Vector2 start, Vector2 end, float length);
 
 private:
 	/// UI
@@ -62,7 +64,7 @@ private:
 	Button btn_destination;
 
 	/// Cells
-	int grid_root_size = 50;
+	int grid_root_size = 16;
 	float grid_rect_size = 100;
 	std::vector<Cell> cells;
 
