@@ -54,12 +54,12 @@ public:
 private:
 	/// UI
 	Vector2 hovered_cell = { 0, 0 };
+	std::shared_ptr<Cell> clicked_cell = nullptr;
 
 	Button btn_droning;
 	Button btn_drone_vision;
 	Button btn_obstacles;
 	Button btn_destination;
-	
 
 	/// Cells
 	int grid_root_size = 50;
@@ -71,7 +71,6 @@ private:
 	std::shared_ptr<Pathfinder> pathfinder;
 	Vector2 destination_coords = { (float)(grid_root_size - 1), (float)(grid_root_size - 1)};
 	bool use_circular_nodes = false;
-
 	
 	/// Inputs
 	std::vector<KeyboardKey> key_pause;

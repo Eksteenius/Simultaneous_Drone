@@ -129,11 +129,28 @@ void Game::update()
 		btn_destination.update(ui_camera);
 		btn_obstacles.update(ui_camera);
 
+		/// Prevent clicking grid when clicking buttons
 		if (btn_droning.clicked);
 		else if (btn_destination.clicked) btn_obstacles.active = false;
 		else if (btn_obstacles.clicked) btn_destination.active = false;
 
-		/// CLICK
+		/// GRID CLICK
+		else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+		{
+			if (utils::coordsWithinGrid(hovered_cell, grid_root_size))
+			{
+				int index = utils::coordsToIndex(hovered_cell, grid_root_size);
+				if(clicked_cell == nullptr)
+				{
+					clicked_cell = std::make_shared<Cell>(cells[index]);
+				}
+				
+				if (btn_obstacles.active && clicked_cell != nullptr) /// Place barriers
+				{
+					cells[index].barrier = !clicked_cell->barrier;
+				}
+			}
+		}
 		else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
 		{
 			if (!utils::coordsWithinGrid(hovered_cell, grid_root_size));
@@ -142,16 +159,15 @@ void Game::update()
 				destination_coords = hovered_cell;
 				pathfinder->path_set = false;
 			}
-			else if (btn_obstacles.active) /// Place barriers
+
+			if (clicked_cell != nullptr)
 			{
-				int index = utils::coordsToIndex(hovered_cell, grid_root_size);
-				if (index >= 0 && index < cells.size())
-				{
-					cells[index].barrier = !cells[index].barrier;
-					pathfinder->path_set = false;
-				}
+				clicked_cell = nullptr;
+				pathfinder->path_set = false;
 			}
 		}
+
+		/// RAYCASTING
 
 		/// PATHFINDING
 		if (!pathfinder->path_set)

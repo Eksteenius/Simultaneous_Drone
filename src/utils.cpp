@@ -37,7 +37,11 @@ float utils::randomFromRange(float min, float max)
 
 bool utils::coordsWithinGrid(Vector2 coords, float grid_size)
 {
-	return (coords.x >= 0 && coords.x < grid_size && coords.y >= 0 && coords.y < grid_size);
+	if ((coords.x >= 0 && coords.x < grid_size && coords.y >= 0 && coords.y < grid_size))
+	{
+		return true;
+	}
+	return false;
 }
 
 int utils::coordsToIndex(int x, int y, int grid_size)
