@@ -361,10 +361,12 @@ void Game::render()
 	std::unique_ptr<Vector2> collision = raycastCellCollision(drone.center(), world_mouse_position, 50000);
 	if(collision != nullptr)
 	{
-		DrawCircleLines(collision->x, collision->y, 10, RED);
 		DrawLine(drone.center().x, drone.center().y,
 			world_mouse_position.x,
 			world_mouse_position.y, RED);
+
+		DrawCircle(collision->x, collision->y, 2, RED);
+		DrawCircleLines(collision->x, collision->y, 10, YELLOW);
 	}
 	else
 	{
@@ -426,36 +428,35 @@ void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom)
 
 std::unique_ptr<Vector2> Game::raycastCellCollision(Vector2 start, Vector2 end, float length)
 {
-	Vector2 ray_start = start;
+	Vector2 ray_start = { start.x / grid_rect_size, start.y / grid_rect_size };
 	Vector2 ray_direction = Vector2Normalize(Vector2Subtract(end, start));
 
 	Vector2 unit_step_size = { abs(1.0f / ray_direction.x), abs(1.0f / ray_direction.y) };
+	Vector2 cell_coords_check = { floorf(ray_start.x), floorf(ray_start.y) };
 
-	Vector2 cell_coords_check = utils::globalToCoords(ray_start, grid_rect_size);
-	Vector2 unit_ray_length;
-
+	Vector2 unit_distance;
 	Vector2 step;
 
 	if (ray_direction.x < 0)
 	{
 		step.x = -1;
-		unit_ray_length.x = (ray_start.x - cell_coords_check.x) * unit_step_size.x;
+		unit_distance.x = (ray_start.x - cell_coords_check.x) * unit_step_size.x;
 	}
 	else
 	{
 		step.x = 1;
-		unit_ray_length.x = ((int)(cell_coords_check.x + 1.0f) - ray_start.x) * unit_step_size.x;
+		unit_distance.x = ((cell_coords_check.x + 1) - ray_start.x) * unit_step_size.x;
 	}
 
 	if (ray_direction.y < 0)
 	{
 		step.y = -1;
-		unit_ray_length.y = (ray_start.y - cell_coords_check.y) * unit_step_size.y;
+		unit_distance.y = (ray_start.y - cell_coords_check.y) * unit_step_size.y;
 	}
 	else
 	{
 		step.y = 1;
-		unit_ray_length.y = ((int)(cell_coords_check.y + 1.0f) - ray_start.y) * unit_step_size.y;
+		unit_distance.y = ((cell_coords_check.y + 1) - ray_start.y) * unit_step_size.y;
 	}
 
 	bool cell_found = false;
@@ -464,17 +465,17 @@ std::unique_ptr<Vector2> Game::raycastCellCollision(Vector2 start, Vector2 end, 
 	while (!cell_found && distance * grid_rect_size <= length)
 	{
 		/// Walk
-		if (unit_ray_length.x < unit_ray_length.y)
+		if (unit_distance.x < unit_distance.y)
 		{
 			cell_coords_check.x += step.x;
-			distance = unit_ray_length.x;
-			unit_ray_length.x += unit_step_size.x;
+			distance = unit_distance.x;
+			unit_distance.x += unit_step_size.x;
 		}
 		else
 		{
 			cell_coords_check.y += step.y;
-			distance = unit_ray_length.y;
-			unit_ray_length.y += unit_step_size.y;
+			distance = unit_distance.y;
+			unit_distance.y += unit_step_size.y;
 		}
 
 		if (utils::coordsWithinGrid(cell_coords_check, grid_root_size) &&
@@ -488,12 +489,10 @@ std::unique_ptr<Vector2> Game::raycastCellCollision(Vector2 start, Vector2 end, 
 	if (cell_found)
 	{
 		intersection = Vector2Add(ray_start, Vector2Scale(ray_direction, distance));
-		return std::make_unique<Vector2>(intersection);
+		return std::make_unique<Vector2>(utils::coordsToGlobal(intersection, grid_rect_size));
 	}
-
 	return nullptr;
 }
-
 
 /// QUANTUM CAMERAS
 

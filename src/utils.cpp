@@ -61,7 +61,7 @@ Vector2 utils::globalToCoords(Vector2 global, float rect_size)
 
 Vector2 utils::coordsToGlobal(Vector2 coords, float rect_size)
 {
-	return Vector2((int)coords.x * rect_size, (int)coords.y * rect_size);
+	return Vector2(coords.x * rect_size, coords.y * rect_size);
 }
 
 Vector2 utils::center(Vector2 position, float size)
