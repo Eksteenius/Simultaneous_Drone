@@ -1,11 +1,7 @@
+#pragma once
 
-#ifndef RAVINES_CELL_H
-#define RAVINES_CELL_H
-
-//#include <SFML/Graphics.hpp>
-
-#include "iostream"
-#include "vector"
+#include <iostream>
+#include <vector>
 
 class Cell
 {
@@ -36,4 +32,3 @@ public:
 private:
 
 };
-#endif // RAVINES_CELL_H

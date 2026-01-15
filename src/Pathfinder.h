@@ -1,6 +1,4 @@
-
-#ifndef RAVINES_PATHFINDER_H
-#define RAVINES_PATHFINDER_H
+#pragma once
 
 #include <algorithm>
 
@@ -47,5 +45,4 @@ private:
     std::vector<Cell>& cells;
 };
 
-#endif // RAVINES_PATHFINDER_H
 

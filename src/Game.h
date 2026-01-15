@@ -1,4 +1,5 @@
 #pragma once
+
 #include <raylib.h>
 #include <raymath.h>
 
@@ -13,6 +14,7 @@
 #include "Button.h"
 #include "Pathfinder.h"
 #include "Drone.h"
+#include "Raycast.h"
 
 class Game
 {
@@ -51,7 +53,7 @@ public:
 
 	void handleZoom(std::shared_ptr<Camera2D> camera, float zoom);
 
-	std::unique_ptr<Vector2> raycastCellCollision(Vector2 start, Vector2 end, float length);
+	std::unique_ptr<Vector2> raycastCellCollision(Raycast ray);
 
 private:
 	/// UI

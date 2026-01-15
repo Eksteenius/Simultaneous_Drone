@@ -358,7 +358,7 @@ void Game::render()
 	}
 
 	/// RAYCASTING
-	std::unique_ptr<Vector2> collision = raycastCellCollision(drone.center(), world_mouse_position, 50000);
+	std::unique_ptr<Vector2> collision = raycastCellCollision(Raycast(drone.center(), world_mouse_position, 50000));
 	if(collision != nullptr)
 	{
 		DrawLine(drone.center().x, drone.center().y,
@@ -426,10 +426,10 @@ void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom)
 	camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)screen_height) * zoom; 
 }
 
-std::unique_ptr<Vector2> Game::raycastCellCollision(Vector2 start, Vector2 end, float length)
+std::unique_ptr<Vector2> Game::raycastCellCollision(Raycast ray)
 {
-	Vector2 ray_start = { start.x / grid_rect_size, start.y / grid_rect_size };
-	Vector2 ray_direction = Vector2Normalize(Vector2Subtract(end, start));
+	Vector2 ray_start = { ray.start.x / grid_rect_size, ray.start.y / grid_rect_size };
+	Vector2 ray_direction = Vector2Normalize(Vector2Subtract(ray.end, ray.start));
 
 	Vector2 unit_step_size = { abs(1.0f / ray_direction.x), abs(1.0f / ray_direction.y) };
 	Vector2 cell_coords_check = { floorf(ray_start.x), floorf(ray_start.y) };
@@ -462,7 +462,7 @@ std::unique_ptr<Vector2> Game::raycastCellCollision(Vector2 start, Vector2 end, 
 	bool cell_found = false;
 	float distance = 0;
 
-	while (!cell_found && distance * grid_rect_size <= length)
+	while (!cell_found && distance * grid_rect_size <= ray.length)
 	{
 		/// Walk
 		if (unit_distance.x < unit_distance.y)
