@@ -382,6 +382,10 @@ void Game::render()
 
 			DrawCircle(ray.collision.x, ray.collision.y, 2, RED);
 			DrawCircleLines(ray.collision.x, ray.collision.y, 10, YELLOW);
+
+			Cell& cell_collided = cells[ray.collider_index];
+			Vector2 cell_center = utils::center(utils::coordsToGlobal(cell_collided.i, cell_collided.j, grid_rect_size), grid_rect_size);
+			DrawCircleLines(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, RED);
 		}
 		else
 		{
@@ -440,6 +444,9 @@ void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom)
 	camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)screen_height) * zoom; 
 }
 
+/// Current: This function rays collide with cells that are barriers.
+/// To do: Replace this code with rays that collide into objects and get which cell/s the object is on.
+/// Future changes: Cells that rays pass through and are not barriers could be prioritized as we know that route is clear.
 void Game::raycastCellCollision(Raycast& ray)
 {
 	Vector2 ray_start = { ray.start.x / grid_rect_size, ray.start.y / grid_rect_size };
@@ -447,6 +454,7 @@ void Game::raycastCellCollision(Raycast& ray)
 
 	Vector2 unit_step_size = { abs(1.0f / ray_direction.x), abs(1.0f / ray_direction.y) };
 	Vector2 cell_coords_check = { floorf(ray_start.x), floorf(ray_start.y) };
+	int cell_check_index;
 
 	Vector2 unit_distance;
 	Vector2 step;
@@ -494,12 +502,13 @@ void Game::raycastCellCollision(Raycast& ray)
 			unit_distance.y += unit_step_size.y;
 		}
 
+		cell_check_index = utils::coordsToIndex(cell_coords_check, grid_root_size);
+
 		if (distance * grid_rect_size > ray_length) /// prevent collision past raycast length
 		{
 			past_length = true;
 		}
-		else if (utils::coordsWithinGrid(cell_coords_check, grid_root_size) &&
-			cells[utils::coordsToIndex(cell_coords_check, grid_root_size)].barrier)
+		else if (utils::coordsWithinGrid(cell_coords_check, grid_root_size) && cells[cell_check_index].barrier)
 		{
 			cell_found = true;
 		}
@@ -510,6 +519,7 @@ void Game::raycastCellCollision(Raycast& ray)
 	{
 		intersection = Vector2Add(ray_start, Vector2Scale(ray_direction, distance));
 		ray.collision = utils::coordsToGlobal(intersection, grid_rect_size);
+		ray.collider_index = cell_check_index;
 		ray.distance = distance;
 		ray.collided = true;
 	}

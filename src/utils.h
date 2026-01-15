@@ -22,6 +22,7 @@ namespace utils
 	/// Uses grid rect size
 	Vector2 globalToCoords(Vector2 global, float rect_size);
 	Vector2 coordsToGlobal(Vector2 coords, float rect_size);
+	Vector2 coordsToGlobal(int i, int j, float rect_size);
 
 	Vector2 center(Vector2 position, float size);
 
