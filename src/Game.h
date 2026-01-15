@@ -53,7 +53,7 @@ public:
 
 	void handleZoom(std::shared_ptr<Camera2D> camera, float zoom);
 
-	std::unique_ptr<Vector2> raycastCellCollision(Raycast ray);
+	void raycastCellCollision(Raycast& ray);
 
 private:
 	/// UI
@@ -75,6 +75,9 @@ private:
 	std::shared_ptr<Pathfinder> pathfinder;
 	Vector2 destination_coords = { (float)(grid_root_size - 1), (float)(grid_root_size - 1)};
 	bool use_circular_nodes = false;
+
+	/// Raycasting
+	std::vector<Raycast> raycasts;
 	
 	/// Inputs
 	std::vector<KeyboardKey> key_pause;
