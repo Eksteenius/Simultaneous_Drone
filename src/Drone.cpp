@@ -73,10 +73,11 @@ Vector2 Drone::getCurrentPathing()
 int Drone::rayCount(float min_size)
 {
 	int fov_ray_count = 3;
-	int fov_half_count = std::floorf((utils::angleToRad(fov)) / (2 * atanf((min_size) / range)));
+	int fov_half_count = std::ceil((utils::angleToRad(fov)) / (2.f * asinf((min_size) / range))) + 1;
 	if (fov_half_count > 0)
 	{
-		fov_ray_count = fov_half_count * 2 + 1;
+		fov_ray_count = fov_half_count * 2 + 1; /// Adding 1 ensures a ray is always cast straight forward in the drones direction
+		//fov_ray_count = fov_half_count * 2; /// Fewest casts needed while keeping gap below minimum object size
 	}
 	return fov_ray_count;
 }

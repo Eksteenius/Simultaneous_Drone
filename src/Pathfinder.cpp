@@ -20,10 +20,9 @@ void Pathfinder::AStar()
     {
         if (!open_set.empty() && (search_iterations < 0 || closed_set.size() < search_iterations))
         {
-            std::sort(open_set.begin(), open_set.end(), [](const Cell& a, const Cell& b) {
-                if (a.f != b.f) {
-                    return a.f > b.f;  // Sort by largest f values first
-                }
+            std::sort(open_set.begin(), open_set.end(), [](const Cell& a, const Cell& b) 
+                {
+                if (a.f != b.f) return a.f > b.f;  // Sort by largest f values first
                 return a.g < b.g;  // Sort by smallest g value first when f is equal
                 });
 

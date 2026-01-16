@@ -92,12 +92,12 @@ Vector2 utils::directionToPoint(Vector2 position, Vector2 point)
 
 float utils::angleToRad(float angle)
 {
-	return angle * (PI / 180);
+	return angle * (PI / 180.0f);
 }
 
 float utils::radToAngle(float radian)
 {
-	return radian * (180.0 / PI);
+	return radian * (180.0f / PI);
 }
 
 float utils::angleFromVector(Vector2 vector)
@@ -108,7 +108,7 @@ float utils::angleFromVector(Vector2 vector)
 Vector2 utils::unitVectorFromAngle(float angle)
 {
 	float angle_rad = angleToRad(angle);
-	return Vector2((float)cosf(angle_rad), (float)sinf(angle_rad));
+	return Vector2(cosf(angle_rad), sinf(angle_rad));
 }
 
 bool utils::isKeyVectorDown(std::vector<KeyboardKey> keys)

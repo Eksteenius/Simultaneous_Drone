@@ -127,11 +127,11 @@ void Game::update()
 		/// DRONE INPUTS
 		if (IsKeyReleased(KEY_EQUAL))
 		{
-			drone.range *= 1 + 0.5f;
+			drone.range *= 1.5f;
 		}
 		else if (IsKeyReleased(KEY_MINUS))
 		{
-			drone.range *= 1 - 0.5f;
+			drone.range /= 1.5f;
 		}
 
 		/// BUTTONS
