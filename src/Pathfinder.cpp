@@ -43,7 +43,7 @@ void Pathfinder::AStar()
                 while (temp_current->previous != nullptr)
                 {
                     path.push_back(*temp_current->previous);
-                    temp_current = temp_current->previous;
+                    temp_current = &*temp_current->previous;
                 }
 
                 last_solved_path = path;
@@ -114,7 +114,7 @@ void Pathfinder::AStar()
                             {
                                 neighbor.h = heuristic(current_cell, neighbor, cells[end_cell_index]);
                                 neighbor.f = neighbor.g + neighbor.h;
-                                neighbor.previous = &current_cell;
+                                neighbor.previous = std::make_shared<Cell>(current_cell);
                             }
                         }
                     }
@@ -152,7 +152,7 @@ void Pathfinder::AStar()
                 while (temp_current->previous != nullptr)
                 {
                     path.push_back(*temp_current->previous);
-                    temp_current = temp_current->previous;
+                    temp_current = &*temp_current->previous;
                 }
             }
 

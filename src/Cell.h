@@ -24,7 +24,7 @@ public:
 	float g = 0;
 	float h = 0;
 
-	Cell* previous = nullptr;
+	std::shared_ptr<Cell> previous = nullptr;
 
 	bool operator==(const Cell& other) const 
 	{
