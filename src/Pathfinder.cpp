@@ -37,13 +37,13 @@ void Pathfinder::AStar()
 
                 /// Create solved path
                 path = {};
-                Cell* temp_current = &current_cell;
+                std::shared_ptr<std::reference_wrapper<Cell>> temp_current = std::make_shared<std::reference_wrapper<Cell>>(current_cell);
                 path.push_back(*temp_current);
 
-                while (temp_current->previous != nullptr)
+                while (temp_current->get().previous != nullptr)
                 {
-                    path.push_back(*temp_current->previous);
-                    temp_current = &*temp_current->previous;
+                    path.push_back(*temp_current->get().previous);
+                    temp_current = temp_current->get().previous;
                 }
 
                 last_solved_path = path;
@@ -114,7 +114,7 @@ void Pathfinder::AStar()
                             {
                                 neighbor.h = heuristic(current_cell, neighbor, cells[end_cell_index]);
                                 neighbor.f = neighbor.g + neighbor.h;
-                                neighbor.previous = std::make_shared<Cell>(current_cell);
+                                neighbor.previous = std::make_shared<std::reference_wrapper<Cell>>(current_cell);
                             }
                         }
                     }
@@ -128,7 +128,7 @@ void Pathfinder::AStar()
             pathing_solved = false;
 
             // Find closest cell in closed_set
-            Cell* closest = nullptr;
+            std::shared_ptr<std::reference_wrapper<Cell>> closest = nullptr;
             float smallest_dist = std::numeric_limits<float>::max();
 
             for (Cell& cell : closed_set)
@@ -138,7 +138,7 @@ void Pathfinder::AStar()
                 if (dist < smallest_dist)
                 {
                     smallest_dist = dist;
-                    closest = &cell;
+                    closest = std::make_shared<std::reference_wrapper<Cell>>(cell);
                 }
             }
 
@@ -146,13 +146,13 @@ void Pathfinder::AStar()
             {
                 /// Create closest solved path
                 path = {};
-                Cell* temp_current = closest;
+                std::shared_ptr<std::reference_wrapper<Cell>> temp_current = closest;
                 path.push_back(*temp_current);
 
-                while (temp_current->previous != nullptr)
+                while (temp_current->get().previous != nullptr)
                 {
-                    path.push_back(*temp_current->previous);
-                    temp_current = &*temp_current->previous;
+                    path.push_back(*temp_current->get().previous);
+                    temp_current = temp_current->get().previous;
                 }
             }
 
