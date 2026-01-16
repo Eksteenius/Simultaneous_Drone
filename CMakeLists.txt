@@ -12,7 +12,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
-option(BUILD_WEB "build for web" ON)
+option(BUILD_WEB "build for web" OFF)
 
 set(CMAKE_BUILD_TYPE Release)
 
@@ -36,6 +36,7 @@ target_include_directories(CCTG_Sim_Drones PRIVATE "C:\\Users\\ethan\\Documents\
 
 
 if(${BUILD_WEB})
+    set_target_properties(CCTG_Sim_Drones PROPERTIES OUTPUT_NAME "index")
     target_compile_definitions(CCTG_Sim_Drones PRIVATE PLATFORM_WEB=1)
     target_link_directories(CCTG_Sim_Drones PRIVATE "C:\\Users\\ethan\\Documents\\Work\\Programming\\Other\\Raylib\\build\\raylib")
     target_include_directories(CCTG_Sim_Drones PRIVATE "C:\\Users\\ethan\\Documents\\Work\\Programming\\Other\\emscripten\\upstream\\emscripten\\cache\\sysroot\\include")

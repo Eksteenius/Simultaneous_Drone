@@ -33,7 +33,7 @@ public:
 
 	/// Raycasting
 	float fov = 90;
-	float range = 200;
+	float range = 1000;
 
 private:
 	void setPathing(std::shared_ptr<Pathfinder> _pathfinder, int index);
