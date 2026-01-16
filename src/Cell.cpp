@@ -11,6 +11,15 @@ Cell::~Cell()
 {
 }
 
+void Cell::resetPathData()
+{
+    f = 0;
+    g = 0;
+    h = 0;
+
+    previous = nullptr;
+}
+
 void Cell::addNeighbors(std::vector<Cell>& cells, int rows, int columns)
 {
     /// adds surrounding cells and makes sure not to add cells that do not exist on the edges

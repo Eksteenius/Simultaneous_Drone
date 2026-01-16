@@ -90,9 +90,25 @@ Vector2 utils::directionToPoint(Vector2 position, Vector2 point)
 	return Vector2(point.x - position.x, point.y - position.y);
 }
 
-float utils::AngleFromVector(Vector2 vector)
+float utils::angleToRad(float angle)
 {
-	return fmodf(atan2(vector.y, vector.x) * 180.0f / PI, 360.0f);
+	return angle * (PI / 180);
+}
+
+float utils::radToAngle(float radian)
+{
+	return radian * (180.0 / PI);
+}
+
+float utils::angleFromVector(Vector2 vector)
+{
+	return fmodf(radToAngle(atan2(vector.y, vector.x)), 360.0f);
+}
+
+Vector2 utils::unitVectorFromAngle(float angle)
+{
+	float angle_rad = angleToRad(angle);
+	return Vector2((float)cosf(angle_rad), (float)sinf(angle_rad));
 }
 
 bool utils::isKeyVectorDown(std::vector<KeyboardKey> keys)

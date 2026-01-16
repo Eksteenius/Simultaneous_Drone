@@ -30,7 +30,12 @@ namespace utils
 	float magnitude(Vector2 vector);
 	Vector2 unitVector(Vector2 vector);
 	Vector2 directionToPoint(Vector2 position, Vector2 point);
-	float AngleFromVector(Vector2 vector);
+
+	float angleToRad(float angle);
+	float radToAngle(float radian);
+
+	float angleFromVector(Vector2 vector);
+	Vector2 unitVectorFromAngle(float angle);
 
 	/// Check if any of multiple keys are down
 	bool isKeyVectorDown(std::vector<KeyboardKey> keys);

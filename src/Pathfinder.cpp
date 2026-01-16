@@ -11,12 +11,12 @@ Pathfinder::~Pathfinder()
 
 void Pathfinder::AStar()
 {
-    if (cells[start_cell_index].barrier == true || cells[end_cell_index].barrier == true) 
-    {
-        pathing_complete = true;
-        pathing_solved = false;
-    }
-    else if (path_set == true)
+    //if (cells[start_cell_index].barrier == true || cells[end_cell_index].barrier == true) 
+    //{
+    //    pathing_complete = true;
+    //    pathing_solved = false;
+    //}
+    if (path_set == true)
     {
         if (!open_set.empty() && (search_iterations < 0 || closed_set.size() < search_iterations))
         {
@@ -86,7 +86,7 @@ void Pathfinder::AStar()
 
                             if (neighbor.i != current_cell.i && neighbor.j != current_cell.j)
                             {
-                                tentative_g = current_cell.g + 1.4f;
+                                tentative_g = current_cell.g + sqrt(2);
                             }
                             else
                             {
@@ -174,34 +174,33 @@ float Pathfinder::heuristic(Cell& _start_cell, Cell& _neighbor, Cell& _end_cell)
     /// If a heuristic is too low it will search more than needed
     /// If a heuristic is too high it will become a greedy best first search
 
-    ///Manhattan Heuristic With Dynamic Priority Intuitive
+    /// Manhattan Heuristic With Priority Intuitive
     int dx1 = std::abs(neigh.i - end.i);
     int dy1 = std::abs(neigh.j - end.j);
     int dx2 = std::abs(start.i - end.i);
     int dy2 = std::abs(start.j - end.j);
     float cross = (float)std::abs((dx1 * dy2) - (dx2 * dy1));
     float h = (float)(dx1 + dy1);
-    //h += cross * 0.01;
-    h *= 1 + (1 / (cells.size()));
+    h += cross * 0.01; /// Tie breaker
     float d = h;
     return d;
 
-    ///Manhattan Distance (Bad at diagonals)
+    /// Manhattan Distance (Bad at diagonals)
     //int d = (std::abs(neigh.i - end.i) + std::abs(neigh.j - end.j));
     //return d;
 
-    ///Standard Manhattan Heuristic
+    /// Standard Manhattan Heuristic
     //int dx = std::abs(neigh.i - end.i);
     //int dy = std::abs(neigh.j - end.j);
     //int d = 1;
     //return d * (dx + dy);
 
-    ///Euclidean Heuristic (too low) (shortest path will almost never be this short a distance)
+    /// Euclidean Heuristic (too low) (shortest path will almost never be this short a distance)
     //float d = std::sqrt(std::pow(neigh.i - neigh.j, 2) + std::pow(end.i - end.j, 2));
     //return d;
 
 
-    ///Other
+    /// Other (Dijkstra)
     //return 1;
 }
 
@@ -209,10 +208,7 @@ void Pathfinder::resetPathfinder()
 {
     for (Cell& cell : cells)
     {
-            cell.f = 0;
-            cell.g = 0;
-            cell.h = 0;
-            cell.previous = nullptr;
+        cell.resetPathData();
     }
 
     open_set.clear();

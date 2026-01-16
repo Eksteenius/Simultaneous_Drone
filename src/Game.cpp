@@ -124,6 +124,16 @@ void Game::update()
 
 		world_mouse_position = GetScreenToWorld2D(GetMousePosition(), *game_camera);
 
+		/// DRONE INPUTS
+		if (IsKeyReleased(KEY_EQUAL))
+		{
+			drone.range *= 1 + 0.5f;
+		}
+		else if (IsKeyReleased(KEY_MINUS))
+		{
+			drone.range *= 1 - 0.5f;
+		}
+
 		/// BUTTONS
 		btn_droning.update(ui_camera);
 		btn_destination.update(ui_camera);
@@ -168,6 +178,22 @@ void Game::update()
 		}
 
 		/// RAYCASTING
+		float fov_ray_count = drone.rayCount(grid_rect_size);
+		if (raycasts.size() < fov_ray_count)
+		{
+			while (raycasts.size() < fov_ray_count)
+			{
+				raycasts.push_back(Raycast(drone.center(), world_mouse_position));
+			}
+		}
+		for (int i = 0; i < fov_ray_count; i++)
+		{
+			raycasts[i].start = drone.center();
+			raycasts[i].end = Vector2Add(drone.center(),
+				Vector2Scale(utils::unitVectorFromAngle(drone.rotation + (drone.fov / 2.f) - (drone.fov / (fov_ray_count - 1)) * i), drone.range));
+
+			raycastCellCollision(raycasts[i]);
+		}
 
 		/// PATHFINDING
 		if (!pathfinder->path_set)
@@ -204,22 +230,6 @@ void Game::update()
 			drone.moveOnPath(pathfinder, grid_rect_size, dt);
 			//drone.moveToPoint(utils::coordsToGlobal(destination_coords, grid_rect_size), dt);
 		}
-
-		/// RAYCASTING
-		if (raycasts.size() == 0)
-		{
-			raycasts.push_back(Raycast(drone.center(), world_mouse_position));
-		}
-		else
-		{
-			raycasts[0].start = drone.center();
-			raycasts[0].end = world_mouse_position;
-		}
-		for (Raycast& ray : raycasts)
-		{
-			raycastCellCollision(ray);
-		}
-		
 	}
 
 	if(IsWindowMinimized())
@@ -245,7 +255,7 @@ void Game::render()
 
 	/// CELLS
 	DrawRectangle(0, 0, grid_root_size * grid_rect_size, grid_root_size * grid_rect_size, DARKGRAY);
-	for (Cell& cell : cells)
+	for (const Cell& cell : cells)
 	{
 		/// GRID
 		DrawRectangleLines((cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size, WHITE);
@@ -271,7 +281,7 @@ void Game::render()
 	/// SEARCHED CELLS
 	if (pathfinder->pathing_complete)
 	{
-		for (Cell& cell : pathfinder->getClosedSet())
+		for (const Cell& cell : pathfinder->getClosedSet())
 		{
 			if ((pathfinder->pathing_solved && 
 				std::find(pathfinder->getPath().begin(), pathfinder->getPath().end(), cell) == pathfinder->getPath().end()) ||
@@ -320,7 +330,7 @@ void Game::render()
 	/// UNSOLVED PATH
 	else if (pathfinder->getLastSolvedPath().size() > 0)
 	{
-		for (Cell& cell : pathfinder->getLastSolvedPath())
+		for (const Cell& cell : pathfinder->getLastSolvedPath())
 		{
 			if (use_circular_nodes)
 			{
@@ -374,22 +384,27 @@ void Game::render()
 	}
 
 	/// RAYCASTING
-	for (Raycast ray : raycasts)
+	float fov_ray_count = drone.rayCount(grid_rect_size);
+	if (fov_ray_count > 0 && raycasts.size() > 0)
 	{
-		if (ray.collided)
+		//for (const Raycast& ray : raycasts)
+		for (int i = 0; i < fov_ray_count; i++)
 		{
-			DrawLine(ray.start.x, ray.start.y, ray.end.x, ray.end.y, RED);
+			if (raycasts[i].collided)
+			{
+				DrawLine(raycasts[i].start.x, raycasts[i].start.y, raycasts[i].end.x, raycasts[i].end.y, RED);
 
-			DrawCircle(ray.collision.x, ray.collision.y, 2, RED);
-			DrawCircleLines(ray.collision.x, ray.collision.y, 10, YELLOW);
+				DrawCircle(raycasts[i].collision.x, raycasts[i].collision.y, 2, RED);
+				DrawCircleLines(raycasts[i].collision.x, raycasts[i].collision.y, 10, YELLOW);
 
-			Cell& cell_collided = cells[ray.collider_index];
-			Vector2 cell_center = utils::center(utils::coordsToGlobal(cell_collided.i, cell_collided.j, grid_rect_size), grid_rect_size);
-			DrawCircleLines(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, RED);
-		}
-		else
-		{
-			DrawLine(ray.start.x, ray.start.y, ray.end.x, ray.end.y, WHITE);
+				Cell& cell_collided = cells[raycasts[i].collider_index];
+				Vector2 cell_center = utils::center(utils::coordsToGlobal(cell_collided.i, cell_collided.j, grid_rect_size), grid_rect_size);
+				DrawCircleLines(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, RED);
+			}
+			else
+			{
+				DrawLine(raycasts[i].start.x, raycasts[i].start.y, raycasts[i].end.x, raycasts[i].end.y, WHITE);
+			}
 		}
 	}
 
@@ -486,6 +501,7 @@ void Game::raycastCellCollision(Raycast& ray)
 
 	float ray_length = utils::magnitude(utils::directionToPoint(ray.start, ray.end));
 	bool past_length = (distance * grid_rect_size > ray_length);
+
 	while (!cell_found && !past_length)
 	{
 		/// Walk
@@ -504,7 +520,9 @@ void Game::raycastCellCollision(Raycast& ray)
 
 		cell_check_index = utils::coordsToIndex(cell_coords_check, grid_root_size);
 
-		if (distance * grid_rect_size > ray_length) /// prevent collision past raycast length
+		float max_range = 50000;
+
+		if (distance * grid_rect_size > ray_length || distance * grid_rect_size > max_range) /// prevent collision past raycast length and hard limit
 		{
 			past_length = true;
 		}

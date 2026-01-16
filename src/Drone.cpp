@@ -70,6 +70,17 @@ Vector2 Drone::getCurrentPathing()
 	return path_coords;
 }
 
+int Drone::rayCount(float min_size)
+{
+	int fov_ray_count = 3;
+	int fov_half_count = std::floorf((utils::angleToRad(fov)) / (2 * atanf((min_size) / range)));
+	if (fov_half_count > 0)
+	{
+		fov_ray_count = fov_half_count * 2 + 1;
+	}
+	return fov_ray_count;
+}
+
 void Drone::setPathing(std::shared_ptr<Pathfinder> _pathfinder, int index)
 {
 	path_valid = false;
@@ -90,7 +101,7 @@ void Drone::moveToPoint(Vector2 point, float amount, float dt)
 	Vector2 direction = utils::directionToPoint(position, point);
 	Vector2 unit_direction = utils::unitVector(direction);
 
-	float direction_angle = utils::AngleFromVector(direction);
+	float direction_angle = utils::angleFromVector(direction);
 	if (direction_angle < 0) direction_angle += 360;
 
 	

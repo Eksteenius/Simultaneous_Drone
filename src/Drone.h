@@ -19,6 +19,7 @@ public:
 	void moveToPoint(Vector2 point, float amount, float dt);
 	void moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, float dt);
 	Vector2 getCurrentPathing();
+	int rayCount(float min_size);
 
 	float size = 1;
 	float rotation = 0;
@@ -32,7 +33,7 @@ public:
 
 	/// Raycasting
 	float fov = 90;
-	float range = 2000;
+	float range = 200;
 
 private:
 	void setPathing(std::shared_ptr<Pathfinder> _pathfinder, int index);
