@@ -1,0 +1,50 @@
+[
+{
+  "directory": "C:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web",
+  "command": "C:\\Users\\Ethan\\Documents\\Work\\Programming\\Other\\emscripten\\upstream\\emscripten\\em++.bat -DPLATFORM_WEB=1 -IC:/Users/ethan/Documents/Work/Programming/Other/Raylib/build/raylib/include -IC:/Users/ethan/Documents/Work/Programming/Other/emscripten/upstream/emscripten/cache/sysroot/include -IC:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web/_deps/nlohmann_json-src/include -O3 -DNDEBUG -std=c++20 -o CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Button.cpp.o -c C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Button.cpp",
+  "file": "C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Button.cpp",
+  "output": "CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Button.cpp.o"
+},
+{
+  "directory": "C:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web",
+  "command": "C:\\Users\\Ethan\\Documents\\Work\\Programming\\Other\\emscripten\\upstream\\emscripten\\em++.bat -DPLATFORM_WEB=1 -IC:/Users/ethan/Documents/Work/Programming/Other/Raylib/build/raylib/include -IC:/Users/ethan/Documents/Work/Programming/Other/emscripten/upstream/emscripten/cache/sysroot/include -IC:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web/_deps/nlohmann_json-src/include -O3 -DNDEBUG -std=c++20 -o CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Cell.cpp.o -c C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Cell.cpp",
+  "file": "C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Cell.cpp",
+  "output": "CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Cell.cpp.o"
+},
+{
+  "directory": "C:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web",
+  "command": "C:\\Users\\Ethan\\Documents\\Work\\Programming\\Other\\emscripten\\upstream\\emscripten\\em++.bat -DPLATFORM_WEB=1 -IC:/Users/ethan/Documents/Work/Programming/Other/Raylib/build/raylib/include -IC:/Users/ethan/Documents/Work/Programming/Other/emscripten/upstream/emscripten/cache/sysroot/include -IC:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web/_deps/nlohmann_json-src/include -O3 -DNDEBUG -std=c++20 -o CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Drone.cpp.o -c C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Drone.cpp",
+  "file": "C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Drone.cpp",
+  "output": "CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Drone.cpp.o"
+},
+{
+  "directory": "C:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web",
+  "command": "C:\\Users\\Ethan\\Documents\\Work\\Programming\\Other\\emscripten\\upstream\\emscripten\\em++.bat -DPLATFORM_WEB=1 -IC:/Users/ethan/Documents/Work/Programming/Other/Raylib/build/raylib/include -IC:/Users/ethan/Documents/Work/Programming/Other/emscripten/upstream/emscripten/cache/sysroot/include -IC:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web/_deps/nlohmann_json-src/include -O3 -DNDEBUG -std=c++20 -o CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Game.cpp.o -c C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Game.cpp",
+  "file": "C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Game.cpp",
+  "output": "CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Game.cpp.o"
+},
+{
+  "directory": "C:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web",
+  "command": "C:\\Users\\Ethan\\Documents\\Work\\Programming\\Other\\emscripten\\upstream\\emscripten\\em++.bat -DPLATFORM_WEB=1 -IC:/Users/ethan/Documents/Work/Programming/Other/Raylib/build/raylib/include -IC:/Users/ethan/Documents/Work/Programming/Other/emscripten/upstream/emscripten/cache/sysroot/include -IC:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web/_deps/nlohmann_json-src/include -O3 -DNDEBUG -std=c++20 -o CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Pathfinder.cpp.o -c C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Pathfinder.cpp",
+  "file": "C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Pathfinder.cpp",
+  "output": "CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Pathfinder.cpp.o"
+},
+{
+  "directory": "C:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web",
+  "command": "C:\\Users\\Ethan\\Documents\\Work\\Programming\\Other\\emscripten\\upstream\\emscripten\\em++.bat -DPLATFORM_WEB=1 -IC:/Users/ethan/Documents/Work/Programming/Other/Raylib/build/raylib/include -IC:/Users/ethan/Documents/Work/Programming/Other/emscripten/upstream/emscripten/cache/sysroot/include -IC:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web/_deps/nlohmann_json-src/include -O3 -DNDEBUG -std=c++20 -o CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Raycast.cpp.o -c C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Raycast.cpp",
+  "file": "C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\Raycast.cpp",
+  "output": "CMakeFiles\\CCTG_Sim_Drones.dir\\src\\Raycast.cpp.o"
+},
+{
+  "directory": "C:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web",
+  "command": "C:\\Users\\Ethan\\Documents\\Work\\Programming\\Other\\emscripten\\upstream\\emscripten\\em++.bat -DPLATFORM_WEB=1 -IC:/Users/ethan/Documents/Work/Programming/Other/Raylib/build/raylib/include -IC:/Users/ethan/Documents/Work/Programming/Other/emscripten/upstream/emscripten/cache/sysroot/include -IC:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web/_deps/nlohmann_json-src/include -O3 -DNDEBUG -std=c++20 -o CMakeFiles\\CCTG_Sim_Drones.dir\\src\\main.cpp.o -c C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\main.cpp",
+  "file": "C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\main.cpp",
+  "output": "CMakeFiles\\CCTG_Sim_Drones.dir\\src\\main.cpp.o"
+},
+{
+  "directory": "C:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web",
+  "command": "C:\\Users\\Ethan\\Documents\\Work\\Programming\\Other\\emscripten\\upstream\\emscripten\\em++.bat -DPLATFORM_WEB=1 -IC:/Users/ethan/Documents/Work/Programming/Other/Raylib/build/raylib/include -IC:/Users/ethan/Documents/Work/Programming/Other/emscripten/upstream/emscripten/cache/sysroot/include -IC:/Users/Ethan/Documents/Work/Github/Simultaneous_Drone/build-web/_deps/nlohmann_json-src/include -O3 -DNDEBUG -std=c++20 -o CMakeFiles\\CCTG_Sim_Drones.dir\\src\\utils.cpp.o -c C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\utils.cpp",
+  "file": "C:\\Users\\Ethan\\Documents\\Work\\Github\\Simultaneous_Drone\\src\\utils.cpp",
+  "output": "CMakeFiles\\CCTG_Sim_Drones.dir\\src\\utils.cpp.o"
+}
+]

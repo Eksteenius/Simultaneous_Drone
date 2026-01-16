@@ -23,27 +23,28 @@ int main(void)
 
     //ToggleBorderlessWindowed();
 
-    std::shared_ptr<Camera2D> game_camera = std::make_shared<Camera2D>();
+    static std::shared_ptr<Camera2D> game_camera = std::make_shared<Camera2D>();
     game_camera->target = { 0,0 };
     game_camera->rotation = 0.0f;
     game_camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)Game::screen_height);
     game_camera->offset = { 0,0 };
 
-    std::shared_ptr<Camera2D> ui_camera = std::make_shared<Camera2D>();
+    static std::shared_ptr<Camera2D> ui_camera = std::make_shared<Camera2D>();
     ui_camera->target = { 0,0 };
     ui_camera->rotation = 0.0f;
     ui_camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)Game::screen_height);
     ui_camera->offset = { 0,0 };
 
-    Game game(game_camera, ui_camera);
+    static Game game(game_camera, ui_camera);
 
     if (!game.init(false)) /// Run the init function of the game class and check it all initialises ok
     {
         return 0;
     }
 
-#if defined(PLATFORM_WEB)
-    emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
+#ifdef PLATFORM_WEB
+    // Emscripten requires a function with no parameters
+    emscripten_set_main_loop([]() {UpdateDrawFrame(game, game_camera, ui_camera);}, 0, 1);
 #else
     /// MAIN GAME LOOP
     while (!WindowShouldClose()) /// Detect window close button or ESC key

@@ -9,7 +9,6 @@
 class Pathfinder
 {
 public:
-    Pathfinder() = default;
     Pathfinder(std::vector<Cell>& _cells);
 	~Pathfinder();
 

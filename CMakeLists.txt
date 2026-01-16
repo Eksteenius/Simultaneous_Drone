@@ -12,7 +12,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
-option(BUILD_WEB "build for web" OFF)
+option(BUILD_WEB "build for web" ON)
 
 set(CMAKE_BUILD_TYPE Release)
 
@@ -41,8 +41,8 @@ if(${BUILD_WEB})
     target_include_directories(CCTG_Sim_Drones PRIVATE "C:\\Users\\ethan\\Documents\\Work\\Programming\\Other\\emscripten\\upstream\\emscripten\\cache\\sysroot\\include")
 else()
     target_link_directories(CCTG_Sim_Drones PRIVATE "C:\\Users\\ethan\\Documents\\Work\\Programming\\Other\\raylib-static-release")
+    target_link_libraries(CCTG_Sim_Drones PRIVATE Winmm)
 endif()
 
 target_link_libraries(CCTG_Sim_Drones PRIVATE raylib)
-target_link_libraries(CCTG_Sim_Drones PRIVATE Winmm)
 target_include_directories(CCTG_Sim_Drones PRIVATE ${nlohmann_json_SOURCE_DIR}/include)

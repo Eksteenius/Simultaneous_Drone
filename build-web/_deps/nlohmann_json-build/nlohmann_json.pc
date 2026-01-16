@@ -1,0 +1,7 @@
+prefix=C:/Users/Ethan/Documents/Work/Programming/Other/emscripten/upstream/emscripten/cache/sysroot
+includedir=${prefix}/include
+
+Name: nlohmann_json
+Description: JSON for Modern C++
+Version: 3.12.0
+Cflags: -I${includedir}

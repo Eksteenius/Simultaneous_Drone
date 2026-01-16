@@ -33,7 +33,7 @@ void Button::update(std::shared_ptr<Camera2D> camera)
 
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
         {
-            if(click_started = true)
+            if(click_started == true)
             {
                 Click();
             }
