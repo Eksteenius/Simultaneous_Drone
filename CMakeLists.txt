@@ -12,7 +12,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
-option(BUILD_WEB "build for web" OFF)
+option(BUILD_WEB "build for web" ON)
 
 set(CMAKE_BUILD_TYPE Release)
 

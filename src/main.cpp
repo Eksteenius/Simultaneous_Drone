@@ -10,6 +10,9 @@
 //const int screenWidth = rl::GetMonitorWidth(rl::GetCurrentMonitor());
 //const int screenHeight = rl::GetMonitorHeight(rl::GetCurrentMonitor());
 
+//const int screenWidth = (float)GetScreenWidth();
+//const int screenHeight = (float)GetScreenHeight();
+
 void UpdateDrawFrame(Game& _game, std::shared_ptr<Camera2D> _game_camera, std::shared_ptr<Camera2D> _ui_camera); /// Update and Draw one frame
 
 int main(void)

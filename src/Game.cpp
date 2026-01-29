@@ -13,12 +13,18 @@ Game::~Game()
 
 bool Game::init(bool reset)
 {
-	SetWindowState(FLAG_WINDOW_MINIMIZED);
-	SetConfigFlags(FLAG_WINDOW_ALWAYS_RUN);
+	SetWindowState(FLAG_WINDOW_MAXIMIZED);
 
 	game_camera->offset = { (float)GetMonitorWidth(GetCurrentMonitor()) / 2.0f, (float)GetMonitorHeight(GetCurrentMonitor()) / 2.0f };
 	game_camera->target = { ((float)GetMonitorWidth(GetCurrentMonitor()) / game_camera->zoom) / 2.0f, 
 							((float)GetMonitorHeight(GetCurrentMonitor()) / game_camera->zoom) / 2.0f };
+
+	//game_camera->offset = { (float)GetScreenWidth() / 2.0f, (float)GetScreenHeight() / 2.0f };
+	//game_camera->target = { ((float)GetScreenWidth() / game_camera->zoom) / 2.0f,
+	//						((float)GetScreenHeight() / game_camera->zoom) / 2.0f };
+
+	SetWindowState(FLAG_WINDOW_MINIMIZED);
+	SetConfigFlags(FLAG_WINDOW_ALWAYS_RUN);
 
 	/// CONTROLS
 	key_pause = { KEY_TAB, KEY_ESCAPE };
@@ -385,7 +391,10 @@ void Game::render()
 
 	/// RAYCASTING
 	float fov_ray_count = drone.rayCount(grid_rect_size);
-	if (fov_ray_count > 0 && raycasts.size() > 0)
+
+	DrawCircleSector(drone.center(), drone.range, drone.rotation - drone.fov / 2, drone.rotation + drone.fov / 2, fov_ray_count - 1, ColorAlpha(RED, 0.5f));
+
+	if (fov_ray_count > 0 && raycasts.size() > 0 && raycasts.size() >= fov_ray_count)
 	{
 		//for (const Raycast& ray : raycasts)
 		for (int i = 0; i < fov_ray_count; i++)
@@ -433,7 +442,7 @@ void Game::renderUI()
 		DrawText("PAUSED: Press any key to continue...", 0, 0, 50, WHITE);
 	}
 
-	/// CENTER
+	/// SCREEN CENTER
 	DrawCircle(screen_width / 2.f / ui_zoom, screen_height / 2.f / ui_zoom, 2, WHITE);
 
 	/// CUSTOM CURSOR
@@ -457,6 +466,7 @@ std::unordered_map<int, bool> Game::key_toggled_map;
 void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom) 
 { 
 	camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)screen_height) * zoom; 
+	//camera->zoom = ((float)GetScreenHeight() / (float)screen_height) * zoom;
 }
 
 /// Current: This function rays collide with cells that are barriers.
@@ -504,7 +514,7 @@ void Game::raycastCellCollision(Raycast& ray)
 
 	while (!cell_found && !past_length)
 	{
-		/// Walk
+		/// Walk to next cell
 		if (unit_distance.x < unit_distance.y)
 		{
 			cell_coords_check.x += step.x;
@@ -546,6 +556,8 @@ void Game::raycastCellCollision(Raycast& ray)
 		ray.collided = false;
 	}
 }
+
+///____________________________________________________________________________________________________________________________________________________________
 
 /// QUANTUM CAMERAS
 
