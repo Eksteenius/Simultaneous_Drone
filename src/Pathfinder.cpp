@@ -11,14 +11,9 @@ Pathfinder::~Pathfinder()
 
 void Pathfinder::AStar()
 {
-    //if (cells[start_cell_index].barrier == true || cells[end_cell_index].barrier == true) 
-    //{
-    //    pathing_complete = true;
-    //    pathing_solved = false;
-    //}
-    if (path_set == true)
+    if (path_set == true) // (cells[start_cell_index].barrier == true || cells[end_cell_index].barrier == true)
     {
-        if (!open_set.empty() && (search_iterations < 0 || closed_set.size() < search_iterations))
+        if (!open_set.empty() && (iteration_limit < 0 || closed_set.size() < iteration_limit)) /// iterations_limit is negative when ignored
         {
             /// Sort open set to evaluate the next best cell
             std::sort(open_set.begin(), open_set.end(), [](const Cell& a, const Cell& b) 
