@@ -50,13 +50,14 @@ void Pathfinder::AStar()
                 //open_set.remove(current_cell);
                 open_set.pop_back();
 
+                current_cell.status = Cell::CLOSED;
                 closed_set.push_back(current_cell);
 
                 for (int i = 0; i < current_cell.neighbors.size(); i++)
                 {
                     Cell& neighbor = current_cell.neighbors.at(i);
 
-                    if (std::find(closed_set.begin(), closed_set.end(), neighbor) == closed_set.end() && neighbor.barrier == false)
+                    if (neighbor.status != Cell::CLOSED && neighbor.barrier == false)
                     {
                         bool diagonal_blocked = false;
                         if(neighbor.i != current_cell.i && neighbor.j != current_cell.j)
@@ -90,7 +91,7 @@ void Pathfinder::AStar()
 
                             bool new_path = false;
 
-                            if (std::find(open_set.begin(), open_set.end(), neighbor) != open_set.end())
+                            if (neighbor.status == Cell::OPEN)
                             {
                                 if (tentative_g < neighbor.g)
                                 {
@@ -103,6 +104,7 @@ void Pathfinder::AStar()
                                 neighbor.g = tentative_g;
                                 new_path = true;
 
+                                neighbor.status = Cell::OPEN;
                                 open_set.push_back(neighbor);
                             }
 
@@ -126,11 +128,11 @@ void Pathfinder::AStar()
             // Find closest cell in closed_set
             std::shared_ptr<std::reference_wrapper<Cell>> closest = nullptr;
             float smallest_dist = std::numeric_limits<float>::max();
-
             for (Cell& cell : closed_set)
             {
                 //float dist = heuristic(cells[start_cell_index], cell, cells[end_cell_index]);
-                float dist = utils::magnitude(utils::directionToPoint({ (float)cell.i, (float)cell.j }, { (float)cells[end_cell_index].i, (float)cells[end_cell_index].j }));
+                
+                float dist = utils::magnitude(utils::directionToPoint({ (float)cell.i, (float)cell.j }, { (float)cells[end_cell_index].i, (float)cells[end_cell_index].j }));/// Use this instead if the heuristic is not Euclidean distance
                 if (dist < smallest_dist)
                 {
                     smallest_dist = dist;
@@ -138,9 +140,9 @@ void Pathfinder::AStar()
                 }
             }
 
+            /// Create closest solved path
             if (closest != nullptr)
             {
-                /// Create closest solved path
                 path = {};
                 std::shared_ptr<std::reference_wrapper<Cell>> temp_current = closest;
                 path.push_back(*temp_current);
@@ -158,9 +160,9 @@ void Pathfinder::AStar()
     }
 }
 
-float Pathfinder::heuristic(Cell& _start_cell, Cell& _neighbor, Cell& _end_cell)
+float Pathfinder::heuristic(Cell& _start_cell, Cell& _evaluate_cell, Cell& _end_cell)
 {
-    Cell& neigh = _neighbor;
+    Cell& neigh = _evaluate_cell;
     Cell& end = _end_cell;
     Cell& start = _start_cell;
 
@@ -194,7 +196,6 @@ float Pathfinder::heuristic(Cell& _start_cell, Cell& _neighbor, Cell& _end_cell)
     //float d = std::sqrt(std::pow(neigh.i - neigh.j, 2) + std::pow(end.i - end.j, 2));
     //return d;
 
-
     /// Other (Dijkstra)
     //return 1;
 }
@@ -213,6 +214,7 @@ void Pathfinder::resetPathfinder()
     pathing_complete = false;
     pathing_solved = false;
 
+    cells[start_cell_index].status = Cell::OPEN;
     open_set.push_back(cells[start_cell_index]);
 
     path_in_use = false;

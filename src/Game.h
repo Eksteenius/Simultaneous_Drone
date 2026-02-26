@@ -66,7 +66,7 @@ private:
 	Button btn_destination;
 
 	/// Cells
-	int grid_root_size = 32;
+	int grid_root_size = 64;
 	float grid_rect_size = 100;
 	std::vector<Cell> cells;
 
