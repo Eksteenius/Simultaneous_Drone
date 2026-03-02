@@ -25,14 +25,17 @@ public:
 	static const int screen_width = 1920;
 	static const int screen_height = 1080;
 
+	float monitor_width = 1920;
+	float monitor_height = 1080;
+
 	std::shared_ptr<Camera2D> game_camera;
 	std::shared_ptr<Camera2D> ui_camera;
 
 	float game_zoom = 1;
 	float ui_zoom = 1;
 
-	Vector2 game_offset = Vector2(0, 0);
-	Vector2 ui_offset = Vector2(0, 0);
+	//Vector2 game_offset = Vector2(0, 0);
+	//Vector2 ui_offset = Vector2(0, 0);
 
 	bool init(bool reset);
 	void update();
@@ -66,7 +69,7 @@ private:
 	Button btn_destination;
 
 	/// Cells
-	int grid_root_size = 64;
+	int grid_root_size = 200;
 	float grid_rect_size = 100;
 	std::vector<Cell> cells;
 

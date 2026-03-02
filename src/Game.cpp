@@ -15,9 +15,12 @@ bool Game::init(bool reset)
 {
 	SetWindowState(FLAG_WINDOW_MAXIMIZED);
 
-	game_camera->offset = { (float)GetMonitorWidth(GetCurrentMonitor()) / 2.0f, (float)GetMonitorHeight(GetCurrentMonitor()) / 2.0f };
-	game_camera->target = { ((float)GetMonitorWidth(GetCurrentMonitor()) / game_camera->zoom) / 2.0f, 
-							((float)GetMonitorHeight(GetCurrentMonitor()) / game_camera->zoom) / 2.0f };
+	monitor_width = (float)GetMonitorWidth(GetCurrentMonitor());
+	monitor_height = (float)GetMonitorHeight(GetCurrentMonitor());
+
+	game_camera->offset = { monitor_width / 2.0f, monitor_height / 2.0f };
+	game_camera->target = { (monitor_width / game_camera->zoom) / 2.0f, 
+							(monitor_height / game_camera->zoom) / 2.0f };
 
 	//game_camera->offset = { (float)GetScreenWidth() / 2.0f, (float)GetScreenHeight() / 2.0f };
 	//game_camera->target = { ((float)GetScreenWidth() / game_camera->zoom) / 2.0f,
@@ -263,23 +266,32 @@ void Game::render()
 	DrawRectangle(0, 0, grid_root_size * grid_rect_size, grid_root_size * grid_rect_size, DARKGRAY);
 	for (const Cell& cell : cells)
 	{
-		/// GRID
-		DrawRectangleLines((cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size, WHITE);
-		//DrawRectangleLinesEx({ (cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size }, 1, WHITE);
-
-		/// BARRIER
-		if (cell.barrier == true)
+		if (utils::boxOverlapBox(
+			std::pair(game_camera->target.x - (screen_width / game_zoom) / 2.f,
+				game_camera->target.y - (screen_height / game_zoom) / 2.f),
+			monitor_width / game_camera->zoom, monitor_height / game_camera->zoom,
+			std::pair((cell.i * grid_rect_size), (cell.j * grid_rect_size)),
+			grid_rect_size, grid_rect_size))
 		{
-			if (use_circular_nodes)
+
+			/// GRID
+			DrawRectangleLines((cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size, WHITE);
+			//DrawRectangleLinesEx({ (cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size }, 1, WHITE);
+
+			/// BARRIER
+			if (cell.barrier == true)
 			{
-				Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-				DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(BLACK, 0.25f));
-				DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, BLACK);
-			}
-			else
-			{
-				DrawRectangle((cell.i * grid_rect_size) + 1, (cell.j * grid_rect_size) + 1,grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(BLACK, 0.25f));
-				DrawRectangleLinesEx({ (cell.i * grid_rect_size) + 2, (cell.j * grid_rect_size) + 2, grid_rect_size - 4, grid_rect_size - 4 }, 8, BLACK);
+				if (use_circular_nodes)
+				{
+					Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+					DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(BLACK, 0.25f));
+					DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, BLACK);
+				}
+				else
+				{
+					DrawRectangle((cell.i * grid_rect_size) + 1, (cell.j * grid_rect_size) + 1, grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(BLACK, 0.25f));
+					DrawRectangleLinesEx({ (cell.i * grid_rect_size) + 2, (cell.j * grid_rect_size) + 2, grid_rect_size - 4, grid_rect_size - 4 }, 8, BLACK);
+				}
 			}
 		}
 	}
@@ -289,23 +301,32 @@ void Game::render()
 	{
 		for (const Cell& cell : pathfinder->getClosedSet())
 		{
-			if ((pathfinder->pathing_solved && 
-				std::find(pathfinder->getPath().begin(), pathfinder->getPath().end(), cell) == pathfinder->getPath().end()) ||
-				((pathfinder->getLastSolvedPath().size() > 0) && 
-					std::find(pathfinder->getLastSolvedPath().begin(), pathfinder->getLastSolvedPath().end(), cell) == pathfinder->getLastSolvedPath().end()))
+			if (utils::boxOverlapBox(
+				std::pair(game_camera->target.x - (screen_width / game_zoom) / 2.f,
+					game_camera->target.y - (screen_height / game_zoom) / 2.f),
+				monitor_width / game_camera->zoom, monitor_height / game_camera->zoom,
+				std::pair((cell.i * grid_rect_size), (cell.j * grid_rect_size)),
+				grid_rect_size, grid_rect_size))
 			{
-				if(use_circular_nodes)
+
+				if ((pathfinder->pathing_solved &&
+					std::find(pathfinder->getPath().begin(), pathfinder->getPath().end(), cell) == pathfinder->getPath().end()) ||
+					((pathfinder->getLastSolvedPath().size() > 0) &&
+						std::find(pathfinder->getLastSolvedPath().begin(), pathfinder->getLastSolvedPath().end(), cell) == pathfinder->getLastSolvedPath().end()))
 				{
-					Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-					DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(DARKBLUE, 0.25f));
-					DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, DARKBLUE);
-				}
-				else
-				{
-					DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
-						grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(DARKBLUE, 0.25f));
-					DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
-						grid_rect_size - 4, grid_rect_size - 4 }, 4, DARKBLUE);
+					if (use_circular_nodes)
+					{
+						Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+						DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(DARKBLUE, 0.25f));
+						DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, DARKBLUE);
+					}
+					else
+					{
+						DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
+							grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(DARKBLUE, 0.25f));
+						DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
+							grid_rect_size - 4, grid_rect_size - 4 }, 4, DARKBLUE);
+					}
 				}
 			}
 		}
@@ -318,18 +339,28 @@ void Game::render()
 		for (int i = 1; i < pathfinder->getPath().size(); i++)
 		{
 			const Cell& cell = pathfinder->getPath()[i];
-			if (use_circular_nodes)
+
+			if (utils::boxOverlapBox(
+				std::pair(game_camera->target.x - (screen_width / game_zoom) / 2.f,
+					game_camera->target.y - (screen_height / game_zoom) / 2.f),
+				monitor_width / game_camera->zoom, monitor_height / game_camera->zoom,
+				std::pair((cell.i * grid_rect_size), (cell.j * grid_rect_size)),
+				grid_rect_size, grid_rect_size))
 			{
-				Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-				DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(Color(50, 255, 255, 255), 0.25f));
-				DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(100, 255, 255, 255));
-			}
-			else
-			{
-				DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
-					grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(Color(50, 255, 255, 255), 0.25f));
-				DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
-					grid_rect_size - 4, grid_rect_size - 4 }, 4, Color(100, 255, 255, 255));
+
+				if (use_circular_nodes)
+				{
+					Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+					DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(Color(50, 255, 255, 255), 0.25f));
+					DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(100, 255, 255, 255));
+				}
+				else
+				{
+					DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
+						grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(Color(50, 255, 255, 255), 0.25f));
+					DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
+						grid_rect_size - 4, grid_rect_size - 4 }, 4, Color(100, 255, 255, 255));
+				}
 			}
 		}
 	}
@@ -338,18 +369,27 @@ void Game::render()
 	{
 		for (const Cell& cell : pathfinder->getLastSolvedPath())
 		{
-			if (use_circular_nodes)
+			if (utils::boxOverlapBox(
+				std::pair(game_camera->target.x - (screen_width / game_zoom) / 2.f,
+					game_camera->target.y - (screen_height / game_zoom) / 2.f),
+				monitor_width / game_camera->zoom, monitor_height / game_camera->zoom,
+				std::pair((cell.i * grid_rect_size), (cell.j * grid_rect_size)),
+				grid_rect_size, grid_rect_size))
 			{
-				Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-				DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(RED, 0.25f));
-				DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(255, 0, 0, 255));
-			}
-			else
-			{
-				DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
-					grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(RED, 0.25f));
-				DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
-					grid_rect_size - 4, grid_rect_size - 4 }, 4, Color(255, 0, 0, 255));
+
+				if (use_circular_nodes)
+				{
+					Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+					DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(RED, 0.25f));
+					DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(255, 0, 0, 255));
+				}
+				else
+				{
+					DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
+						grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(RED, 0.25f));
+					DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
+						grid_rect_size - 4, grid_rect_size - 4 }, 4, Color(255, 0, 0, 255));
+				}
 			}
 		}
 	}
@@ -465,7 +505,7 @@ std::unordered_map<int, bool> Game::key_toggled_map;
 
 void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom) 
 { 
-	camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)screen_height) * zoom; 
+	camera->zoom = (monitor_height / (float)screen_height) * zoom; 
 	//camera->zoom = ((float)GetScreenHeight() / (float)screen_height) * zoom;
 }
 
@@ -565,7 +605,7 @@ void Game::raycastCellCollision(Raycast& ray)
 //{
 //	float previous_zoom = camera->zoom;
 //	Vector2 previous_offset = camera->offset;
-//	camera->zoom = ((float)GetMonitorHeight(GetCurrentMonitor()) / (float)screenHeight) * zoom;
+//	camera->zoom = (monitor_height / (float)screenHeight) * zoom;
 //	camera->offset.x = offset.x - previous_offset.x + (previous_zoom * screenWidth - camera->zoom * screenWidth + offset.x * (previous_zoom - camera->zoom)) / 2;
 //	camera->offset.y = offset.y - previous_offset.y + (previous_zoom * screenHeight - camera->zoom * screenHeight + offset.y * (previous_zoom - camera->zoom)) / 2;
 //
