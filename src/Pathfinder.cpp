@@ -26,32 +26,14 @@ void Pathfinder::AStar()
             //current_cell.neighbors = open_set.back().get().neighbors;
 
             /// Pathing solved
-            if (current_cell == cells[end_cell_index])
-            {
-                pathing_complete = true;
-                pathing_solved = true;
-
-                /// Create solved path
-                path = {};
-                std::shared_ptr<std::reference_wrapper<Cell>> temp_current = std::make_shared<std::reference_wrapper<Cell>>(current_cell);
-                path.push_back(*temp_current);
-
-                while (temp_current->get().previous != nullptr)
-                {
-                    path.push_back(*temp_current->get().previous);
-                    temp_current = temp_current->get().previous;
-                }
-
-                last_solved_path = path;
-                path_in_use = false;
-            }
-            else
+            if (current_cell != cells[end_cell_index])
             {
                 //open_set.remove(current_cell);
                 open_set.pop_back();
 
                 current_cell.status = Cell::CLOSED;
                 closed_set.push_back(current_cell);
+
 
                 for (int i = 0; i < current_cell.neighbors.size(); i++)
                 {
@@ -118,6 +100,25 @@ void Pathfinder::AStar()
                     }
                 }
             }
+            else
+            {
+                pathing_complete = true;
+                pathing_solved = true;
+
+                /// Create solved path
+                path = {};
+                std::shared_ptr<std::reference_wrapper<Cell>> temp_current = std::make_shared<std::reference_wrapper<Cell>>(current_cell);
+                path.push_back(*temp_current);
+
+                while (temp_current->get().previous != nullptr)
+                {
+                    path.push_back(*temp_current->get().previous);
+                    temp_current = temp_current->get().previous;
+                }
+
+                last_solved_path = path;
+                path_in_use = false;
+            }
         }
         else
         {
@@ -131,7 +132,6 @@ void Pathfinder::AStar()
             for (Cell& cell : closed_set)
             {
                 //float dist = heuristic(cells[start_cell_index], cell, cells[end_cell_index]);
-                
                 float dist = utils::magnitude(utils::directionToPoint({ (float)cell.i, (float)cell.j }, { (float)cells[end_cell_index].i, (float)cells[end_cell_index].j }));/// Use this instead if the heuristic is not Euclidean distance
                 if (dist < smallest_dist)
                 {
