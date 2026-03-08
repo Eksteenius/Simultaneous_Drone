@@ -70,6 +70,14 @@ bool Game::init(bool reset)
 		cell.addNeighbors(cells, grid_root_size, grid_root_size);
 	}
 
+	for (int j = 0; j < grid_root_size; j++)
+	{
+		for (int i = 0; i < grid_root_size; i++)
+		{
+			obstacles.emplace_back(0);
+		}
+	}
+
 	pathfinder = std::make_shared<Pathfinder>(Pathfinder(cells));
 
 	/// Drone initialization
@@ -159,14 +167,22 @@ void Game::update()
 			if (utils::coordsWithinGrid(hovered_cell, grid_root_size))
 			{
 				int index = utils::coordsToIndex(hovered_cell, grid_root_size);
-				if(clicked_cell == nullptr)
+
+				if (clicked_obstacle == nullptr)
 				{
-					clicked_cell = std::make_shared<Cell>(cells[index]);
+					clicked_obstacle = std::make_shared<float>(obstacles[index]);
 				}
-				
-				if (btn_obstacles.active && clicked_cell != nullptr) /// Place barriers
+
+				if (btn_obstacles.active && clicked_obstacle != nullptr) /// Place barriers
 				{
-					cells[index].barrier = !clicked_cell->barrier;
+					if (*clicked_obstacle == 0)
+					{
+						obstacles[index] = 1;
+					}
+					else
+					{
+						obstacles[index] = 0;
+					}
 				}
 			}
 		}
@@ -179,10 +195,9 @@ void Game::update()
 				pathfinder->path_set = false;
 			}
 
-			if (clicked_cell != nullptr)
+			if (clicked_obstacle != nullptr)
 			{
-				clicked_cell = nullptr;
-				pathfinder->path_set = false;
+				clicked_obstacle = nullptr;
 			}
 		}
 
@@ -201,7 +216,13 @@ void Game::update()
 			raycasts[i].end = Vector2Add(drone.center(),
 				Vector2Scale(utils::unitVectorFromAngle(drone.rotation + (drone.fov / 2.f) - (drone.fov / (fov_ray_count - 1)) * i), drone.range));
 
-			raycastCellCollision(raycasts[i]);
+			raycastGridCollision(raycasts[i]);
+
+			if (raycasts[i].collided && cells[raycasts[i].collider_index].barrier != true)
+			{
+				cells[raycasts[i].collider_index].barrier = true;
+				pathfinder->path_set = false;
+			}
 		}
 
 		/// PATHFINDING
@@ -293,6 +314,20 @@ void Game::render()
 					DrawRectangleLinesEx({ (cell.i * grid_rect_size) + 2, (cell.j * grid_rect_size) + 2, grid_rect_size - 4, grid_rect_size - 4 }, 8, BLACK);
 				}
 			}
+		}
+	}
+
+	/// OBSTACLES
+	for (int i = 0; i < obstacles.size(); i++)
+	{
+		if (obstacles[i] > 0)
+		{
+			Vector2 coords = utils::indexToCoords(i, grid_root_size);
+			Vector2 cell_center = utils::center({ coords.x * grid_rect_size, coords.y * grid_rect_size }, grid_rect_size);
+			DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(BLACK, 0.25f));
+			DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, BLACK);
+
+			Cell test = cells[i];
 		}
 	}
 
@@ -512,14 +547,99 @@ void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom)
 /// Current: This function rays collide with cells that are barriers.
 /// To do: Replace this code with rays that collide into objects and get which cell/s the object is on.
 /// Future changes: Cells that rays pass through and are not barriers could be prioritized as we know that route is clear.
-void Game::raycastCellCollision(Raycast& ray)
+//void Game::raycastCellCollision(Raycast& ray)
+//{
+//	Vector2 ray_start = { ray.start.x / grid_rect_size, ray.start.y / grid_rect_size };
+//	Vector2 ray_direction = Vector2Normalize(Vector2Subtract(ray.end, ray.start));
+//
+//	Vector2 unit_step_size = { abs(1.0f / ray_direction.x), abs(1.0f / ray_direction.y) };
+//	Vector2 cell_coords_check = { floorf(ray_start.x), floorf(ray_start.y) };
+//	int cell_check_index;
+//
+//	Vector2 unit_distance;
+//	Vector2 step;
+//
+//	if (ray_direction.x < 0)
+//	{
+//		step.x = -1;
+//		unit_distance.x = (ray_start.x - cell_coords_check.x) * unit_step_size.x;
+//	}
+//	else
+//	{
+//		step.x = 1;
+//		unit_distance.x = ((cell_coords_check.x + 1) - ray_start.x) * unit_step_size.x;
+//	}
+//
+//	if (ray_direction.y < 0)
+//	{
+//		step.y = -1;
+//		unit_distance.y = (ray_start.y - cell_coords_check.y) * unit_step_size.y;
+//	}
+//	else
+//	{
+//		step.y = 1;
+//		unit_distance.y = ((cell_coords_check.y + 1) - ray_start.y) * unit_step_size.y;
+//	}
+//
+//	bool cell_found = false;
+//	float distance = 0;
+//
+//	float ray_length = utils::magnitude(utils::directionToPoint(ray.start, ray.end));
+//	bool past_length = (distance * grid_rect_size > ray_length);
+//
+//	while (!cell_found && !past_length)
+//	{
+//		/// Walk to next cell
+//		if (unit_distance.x < unit_distance.y)
+//		{
+//			cell_coords_check.x += step.x;
+//			distance = unit_distance.x;
+//			unit_distance.x += unit_step_size.x;
+//		}
+//		else
+//		{
+//			cell_coords_check.y += step.y;
+//			distance = unit_distance.y;
+//			unit_distance.y += unit_step_size.y;
+//		}
+//
+//		cell_check_index = utils::coordsToIndex(cell_coords_check, grid_root_size);
+//
+//		float max_range = 50000;
+//
+//		if (distance * grid_rect_size > ray_length || distance * grid_rect_size > max_range) /// prevent collision past raycast length and hard limit
+//		{
+//			past_length = true;
+//		}
+//		else if (utils::coordsWithinGrid(cell_coords_check, grid_root_size) && cells[cell_check_index].barrier)
+//		{
+//			cell_found = true;
+//		}
+//	}
+//
+//	Vector2 intersection;
+//	if (cell_found)
+//	{
+//		intersection = Vector2Add(ray_start, Vector2Scale(ray_direction, distance));
+//		ray.collision = utils::coordsToGlobal(intersection, grid_rect_size);
+//		ray.collider_index = cell_check_index;
+//		ray.distance = distance;
+//		ray.collided = true;
+//	}
+//	else
+//	{
+//		ray.collided = false;
+//	}
+//}
+
+void Game::raycastGridCollision(Raycast& ray)
 {
 	Vector2 ray_start = { ray.start.x / grid_rect_size, ray.start.y / grid_rect_size };
 	Vector2 ray_direction = Vector2Normalize(Vector2Subtract(ray.end, ray.start));
 
 	Vector2 unit_step_size = { abs(1.0f / ray_direction.x), abs(1.0f / ray_direction.y) };
-	Vector2 cell_coords_check = { floorf(ray_start.x), floorf(ray_start.y) };
-	int cell_check_index;
+	Vector2 grid_coords_check = { floorf(ray_start.x), floorf(ray_start.y) };
+	int grid_check_index;
 
 	Vector2 unit_distance;
 	Vector2 step;
@@ -527,48 +647,48 @@ void Game::raycastCellCollision(Raycast& ray)
 	if (ray_direction.x < 0)
 	{
 		step.x = -1;
-		unit_distance.x = (ray_start.x - cell_coords_check.x) * unit_step_size.x;
+		unit_distance.x = (ray_start.x - grid_coords_check.x) * unit_step_size.x;
 	}
 	else
 	{
 		step.x = 1;
-		unit_distance.x = ((cell_coords_check.x + 1) - ray_start.x) * unit_step_size.x;
+		unit_distance.x = ((grid_coords_check.x + 1) - ray_start.x) * unit_step_size.x;
 	}
 
 	if (ray_direction.y < 0)
 	{
 		step.y = -1;
-		unit_distance.y = (ray_start.y - cell_coords_check.y) * unit_step_size.y;
+		unit_distance.y = (ray_start.y - grid_coords_check.y) * unit_step_size.y;
 	}
 	else
 	{
 		step.y = 1;
-		unit_distance.y = ((cell_coords_check.y + 1) - ray_start.y) * unit_step_size.y;
+		unit_distance.y = ((grid_coords_check.y + 1) - ray_start.y) * unit_step_size.y;
 	}
 
-	bool cell_found = false;
+	bool obstacle_hit = false;
 	float distance = 0;
 
 	float ray_length = utils::magnitude(utils::directionToPoint(ray.start, ray.end));
 	bool past_length = (distance * grid_rect_size > ray_length);
 
-	while (!cell_found && !past_length)
+	while (!obstacle_hit && !past_length)
 	{
-		/// Walk to next cell
+		/// Walk to next in grid
 		if (unit_distance.x < unit_distance.y)
 		{
-			cell_coords_check.x += step.x;
+			grid_coords_check.x += step.x;
 			distance = unit_distance.x;
 			unit_distance.x += unit_step_size.x;
 		}
 		else
 		{
-			cell_coords_check.y += step.y;
+			grid_coords_check.y += step.y;
 			distance = unit_distance.y;
 			unit_distance.y += unit_step_size.y;
 		}
 
-		cell_check_index = utils::coordsToIndex(cell_coords_check, grid_root_size);
+		grid_check_index = utils::coordsToIndex(grid_coords_check, grid_root_size);
 
 		float max_range = 50000;
 
@@ -576,24 +696,24 @@ void Game::raycastCellCollision(Raycast& ray)
 		{
 			past_length = true;
 		}
-		else if (utils::coordsWithinGrid(cell_coords_check, grid_root_size) && cells[cell_check_index].barrier)
+		else if (utils::coordsWithinGrid(grid_coords_check, grid_root_size) && obstacles[grid_check_index] > 0)
 		{
-			cell_found = true;
+			obstacle_hit = true;
 		}
-	}
-
-	Vector2 intersection;
-	if (cell_found)
-	{
-		intersection = Vector2Add(ray_start, Vector2Scale(ray_direction, distance));
-		ray.collision = utils::coordsToGlobal(intersection, grid_rect_size);
-		ray.collider_index = cell_check_index;
-		ray.distance = distance;
-		ray.collided = true;
-	}
-	else
-	{
-		ray.collided = false;
+		
+		Vector2 intersection;
+		if (obstacle_hit)
+		{
+			intersection = Vector2Add(ray_start, Vector2Scale(ray_direction, distance));
+			ray.collision = utils::coordsToGlobal(intersection, grid_rect_size);
+			ray.collider_index = grid_check_index;
+			ray.distance = distance;
+			ray.collided = true;
+		}
+		else
+		{
+			ray.collided = false;
+		}
 	}
 }
 

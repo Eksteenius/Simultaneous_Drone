@@ -56,12 +56,15 @@ public:
 
 	void handleZoom(std::shared_ptr<Camera2D> camera, float zoom);
 
-	void raycastCellCollision(Raycast& ray);
+	//void raycastCellCollision(Raycast& ray);
+	void raycastGridCollision(Raycast& ray);
 
 private:
 	/// UI
 	Vector2 hovered_cell = { 0, 0 };
-	std::shared_ptr<Cell> clicked_cell = nullptr;
+	//std::shared_ptr<Cell> clicked_cell = nullptr;
+	//int clicked_cell_index = -1;
+	std::shared_ptr<float> clicked_obstacle = nullptr;
 
 	Button btn_droning;
 	Button btn_drone_vision;
@@ -71,6 +74,7 @@ private:
 	/// Cells
 	int grid_root_size = 100;
 	float grid_rect_size = 100;
+	std::vector<float> obstacles;
 	std::vector<Cell> cells;
 
 	/// Drones & Pathfinding

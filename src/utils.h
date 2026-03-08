@@ -19,6 +19,7 @@ namespace utils
 	bool coordsWithinGrid(Vector2 coords, float grid_size);
 	int coordsToIndex(int x, int y, int grid_size);
 	int coordsToIndex(Vector2 coords, int grid_size);
+	Vector2 indexToCoords(int index, int grid_size);
 	/// Uses grid rect size
 	Vector2 globalToCoords(Vector2 global, float rect_size);
 	Vector2 coordsToGlobal(Vector2 coords, float rect_size);

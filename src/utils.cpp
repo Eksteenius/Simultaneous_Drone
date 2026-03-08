@@ -54,6 +54,11 @@ int utils::coordsToIndex(Vector2 coords, int grid_size)
 	return (int)coords.x + (int)coords.y * grid_size;
 }
 
+Vector2 utils::indexToCoords(int index, int grid_size)
+{
+	return Vector2((int)(std::fmodf(index, grid_size)), (int)(std::floor(index / grid_size)));
+}
+
 Vector2 utils::globalToCoords(Vector2 global, float rect_size)
 {
 	return Vector2((int)(global.x / rect_size), (int)(global.y / rect_size));
