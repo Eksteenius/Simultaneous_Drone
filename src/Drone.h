@@ -30,6 +30,7 @@ public:
 
 	float proximity_distance = 5.0f;
 	bool path_valid = false;
+	bool using_previous = false;
 
 	/// Raycasting
 	float fov = 90;
@@ -37,6 +38,7 @@ public:
 
 private:
 	void setPathing(std::shared_ptr<Pathfinder> _pathfinder, int index);
+	Vector2 getPathingCoords(std::vector<std::reference_wrapper<Cell>>& _path, int index);
 
 	int path_progress = -1;
 	Vector2 path_coords = { 0, 0 };

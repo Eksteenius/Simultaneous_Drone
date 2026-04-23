@@ -302,17 +302,9 @@ void Game::render()
 			/// BARRIER
 			if (cell.barrier == true)
 			{
-				if (use_circular_nodes)
-				{
-					Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-					DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(BLACK, 0.25f));
-					DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, BLACK);
-				}
-				else
-				{
-					DrawRectangle((cell.i * grid_rect_size) + 1, (cell.j * grid_rect_size) + 1, grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(BLACK, 0.25f));
-					DrawRectangleLinesEx({ (cell.i * grid_rect_size) + 2, (cell.j * grid_rect_size) + 2, grid_rect_size - 4, grid_rect_size - 4 }, 8, BLACK);
-				}
+				Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+				DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(BLACK, 0.25f));
+				DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, BLACK);
 			}
 		}
 	}
@@ -323,11 +315,11 @@ void Game::render()
 		if (obstacles[i] > 0)
 		{
 			Vector2 coords = utils::indexToCoords(i, grid_root_size);
-			Vector2 cell_center = utils::center({ coords.x * grid_rect_size, coords.y * grid_rect_size }, grid_rect_size);
-			DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(BLACK, 0.25f));
-			DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, BLACK);
 
-			Cell test = cells[i];
+			DrawRectangle(coords.x * grid_rect_size + 1, coords.y * grid_rect_size + 1,
+				grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(BLACK, 0.25f));
+			DrawRectangleLinesEx({ coords.x * grid_rect_size + 2, coords.y * grid_rect_size + 2,
+				grid_rect_size - 4, grid_rect_size - 4 }, 4, BLACK);
 		}
 	}
 
@@ -349,19 +341,9 @@ void Game::render()
 					((pathfinder->getLastSolvedPath().size() > 0) &&
 						std::find(pathfinder->getLastSolvedPath().begin(), pathfinder->getLastSolvedPath().end(), cell) == pathfinder->getLastSolvedPath().end()))
 				{
-					if (use_circular_nodes)
-					{
-						Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-						DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(DARKBLUE, 0.25f));
-						DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, DARKBLUE);
-					}
-					else
-					{
-						DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
-							grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(DARKBLUE, 0.25f));
-						DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
-							grid_rect_size - 4, grid_rect_size - 4 }, 4, DARKBLUE);
-					}
+					Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+					DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(DARKBLUE, 0.25f));
+					DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, DARKBLUE);
 				}
 			}
 		}
@@ -383,19 +365,9 @@ void Game::render()
 				grid_rect_size, grid_rect_size))
 			{
 
-				if (use_circular_nodes)
-				{
-					Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-					DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(Color(50, 255, 255, 255), 0.25f));
-					DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(100, 255, 255, 255));
-				}
-				else
-				{
-					DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
-						grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(Color(50, 255, 255, 255), 0.25f));
-					DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
-						grid_rect_size - 4, grid_rect_size - 4 }, 4, Color(100, 255, 255, 255));
-				}
+				Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+				DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(Color(50, 255, 255, 255), 0.25f));
+				DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(100, 255, 255, 255));
 			}
 		}
 	}
@@ -411,39 +383,18 @@ void Game::render()
 				std::pair((cell.i * grid_rect_size), (cell.j * grid_rect_size)),
 				grid_rect_size, grid_rect_size))
 			{
-
-				if (use_circular_nodes)
-				{
-					Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-					DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(RED, 0.25f));
-					DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(255, 0, 0, 255));
-				}
-				else
-				{
-					DrawRectangle(cell.i * grid_rect_size + 1, cell.j * grid_rect_size + 1,
-						grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(RED, 0.25f));
-					DrawRectangleLinesEx({ cell.i * grid_rect_size + 2, cell.j * grid_rect_size + 2,
-						grid_rect_size - 4, grid_rect_size - 4 }, 4, Color(255, 0, 0, 255));
-				}
+				Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
+				DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(RED, 0.25f));
+				DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(255, 0, 0, 255));
 			}
 		}
 	}
 
 	/// DESTINATION
 	{
-		if (use_circular_nodes)
-		{
-			Vector2 cell_center = utils::center(utils::coordsToGlobal(destination_coords, grid_rect_size), grid_rect_size);
-			DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(GREEN, 0.25f));
-			DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(0, 255, 0, 255));
-		}
-		else
-		{
-			DrawRectangle(destination_coords.x * grid_rect_size + 1, destination_coords.y * grid_rect_size + 1,
-				grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(GREEN, 0.25f));
-			DrawRectangleLinesEx({ destination_coords.x * grid_rect_size + 2, destination_coords.y * grid_rect_size + 2,
-				grid_rect_size - 4, grid_rect_size - 4 }, 4, Color(0, 255, 0, 255));
-		}
+		Vector2 cell_center = utils::center(utils::coordsToGlobal(destination_coords, grid_rect_size), grid_rect_size);
+		DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(GREEN, 0.25f));
+		DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(0, 255, 0, 255));
 	}
 
 	/// PROXIMITY PATHING

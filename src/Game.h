@@ -81,7 +81,6 @@ private:
 	Drone drone;
 	std::shared_ptr<Pathfinder> pathfinder;
 	Vector2 destination_coords = { (float)(grid_root_size - 1), (float)(grid_root_size - 1)};
-	bool use_circular_nodes = false;
 
 	/// Raycasting
 	std::vector<Raycast> raycasts;
