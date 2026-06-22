@@ -22,11 +22,11 @@ void Drone::moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, floa
 		{
 			if (_pathfinder->pathing_solved)
 			{
-				path_progress = _pathfinder->getPath().size() - 1;
+				path_progress = _pathfinder->getPath().size() - 2;
 			}
 			else
 			{
-				path_progress = _pathfinder->getLastSolvedPath().size() - 1;
+				path_progress = _pathfinder->getLastSolvedPath().size() - 2;
 			}
 			_pathfinder->path_in_use = true;
 

@@ -44,6 +44,10 @@ public:
 
 	bool paused = true;
 
+	/// RENDERING
+	void drawGridNode(Vector2 center, float radius, Color outlineColor, Color fillColor);
+	void drawGridSquare();
+
 	/// INPUTS
 	void updateKeyToggles();
 	std::vector<KeyboardKey> key_pressed_map;
@@ -72,7 +76,7 @@ private:
 	Button btn_destination;
 
 	/// Cells
-	int grid_root_size = 100;
+	int grid_root_size = 20;
 	float grid_rect_size = 100;
 	std::vector<float> obstacles;
 	std::vector<Cell> cells;

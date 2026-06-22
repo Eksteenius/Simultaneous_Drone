@@ -25,7 +25,7 @@ public:
 	float rotation = 0;
 	Vector2 position = { 0, 0 };
 
-	float speed = 500;
+	float speed = 200;
 	float rotation_speed = 180;
 
 	float proximity_distance = 5.0f;

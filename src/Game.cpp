@@ -366,8 +366,7 @@ void Game::render()
 			{
 
 				Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-				DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(Color(50, 255, 255, 255), 0.25f));
-				DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(100, 255, 255, 255));
+				drawGridNode(cell_center, grid_rect_size / 2, Color(100, 255, 255, 255), ColorAlpha(Color(50, 255, 255, 255), 0.25f));
 			}
 		}
 	}
@@ -384,8 +383,7 @@ void Game::render()
 				grid_rect_size, grid_rect_size))
 			{
 				Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-				DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(RED, 0.25f));
-				DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(255, 0, 0, 255));
+				drawGridNode(cell_center, grid_rect_size / 2, Color(255, 0, 0, 255), ColorAlpha(RED, 0.25f));
 			}
 		}
 	}
@@ -393,8 +391,7 @@ void Game::render()
 	/// DESTINATION
 	{
 		Vector2 cell_center = utils::center(utils::coordsToGlobal(destination_coords, grid_rect_size), grid_rect_size);
-		DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(GREEN, 0.25f));
-		DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, Color(0, 255, 0, 255));
+		drawGridNode(cell_center, grid_rect_size / 2, Color(0, 255, 0, 255), ColorAlpha(GREEN, 0.25f));
 	}
 
 	/// PROXIMITY PATHING
@@ -477,6 +474,17 @@ void Game::renderUI()
 	DrawFPS(0, 0);
 }
 
+void Game::drawGridNode(Vector2 center, float radius, Color outlineColor, Color fillColor)
+{
+	DrawCircle(center.x, center.y, radius - 2, fillColor);
+	DrawRing(center, radius - 8, radius - 2, 0, 360, 1, outlineColor);
+}
+
+void Game::drawGridSquare()
+{
+
+}
+
 void Game::updateKeyToggles()
 {
 	for (auto &pair : key_toggled_map)
@@ -494,94 +502,6 @@ void Game::handleZoom(std::shared_ptr<Camera2D> camera, float zoom)
 	camera->zoom = (monitor_height / (float)screen_height) * zoom; 
 	//camera->zoom = ((float)GetScreenHeight() / (float)screen_height) * zoom;
 }
-
-/// Current: This function rays collide with cells that are barriers.
-/// To do: Replace this code with rays that collide into objects and get which cell/s the object is on.
-/// Future changes: Cells that rays pass through and are not barriers could be prioritized as we know that route is clear.
-//void Game::raycastCellCollision(Raycast& ray)
-//{
-//	Vector2 ray_start = { ray.start.x / grid_rect_size, ray.start.y / grid_rect_size };
-//	Vector2 ray_direction = Vector2Normalize(Vector2Subtract(ray.end, ray.start));
-//
-//	Vector2 unit_step_size = { abs(1.0f / ray_direction.x), abs(1.0f / ray_direction.y) };
-//	Vector2 cell_coords_check = { floorf(ray_start.x), floorf(ray_start.y) };
-//	int cell_check_index;
-//
-//	Vector2 unit_distance;
-//	Vector2 step;
-//
-//	if (ray_direction.x < 0)
-//	{
-//		step.x = -1;
-//		unit_distance.x = (ray_start.x - cell_coords_check.x) * unit_step_size.x;
-//	}
-//	else
-//	{
-//		step.x = 1;
-//		unit_distance.x = ((cell_coords_check.x + 1) - ray_start.x) * unit_step_size.x;
-//	}
-//
-//	if (ray_direction.y < 0)
-//	{
-//		step.y = -1;
-//		unit_distance.y = (ray_start.y - cell_coords_check.y) * unit_step_size.y;
-//	}
-//	else
-//	{
-//		step.y = 1;
-//		unit_distance.y = ((cell_coords_check.y + 1) - ray_start.y) * unit_step_size.y;
-//	}
-//
-//	bool cell_found = false;
-//	float distance = 0;
-//
-//	float ray_length = utils::magnitude(utils::directionToPoint(ray.start, ray.end));
-//	bool past_length = (distance * grid_rect_size > ray_length);
-//
-//	while (!cell_found && !past_length)
-//	{
-//		/// Walk to next cell
-//		if (unit_distance.x < unit_distance.y)
-//		{
-//			cell_coords_check.x += step.x;
-//			distance = unit_distance.x;
-//			unit_distance.x += unit_step_size.x;
-//		}
-//		else
-//		{
-//			cell_coords_check.y += step.y;
-//			distance = unit_distance.y;
-//			unit_distance.y += unit_step_size.y;
-//		}
-//
-//		cell_check_index = utils::coordsToIndex(cell_coords_check, grid_root_size);
-//
-//		float max_range = 50000;
-//
-//		if (distance * grid_rect_size > ray_length || distance * grid_rect_size > max_range) /// prevent collision past raycast length and hard limit
-//		{
-//			past_length = true;
-//		}
-//		else if (utils::coordsWithinGrid(cell_coords_check, grid_root_size) && cells[cell_check_index].barrier)
-//		{
-//			cell_found = true;
-//		}
-//	}
-//
-//	Vector2 intersection;
-//	if (cell_found)
-//	{
-//		intersection = Vector2Add(ray_start, Vector2Scale(ray_direction, distance));
-//		ray.collision = utils::coordsToGlobal(intersection, grid_rect_size);
-//		ray.collider_index = cell_check_index;
-//		ray.distance = distance;
-//		ray.collided = true;
-//	}
-//	else
-//	{
-//		ray.collided = false;
-//	}
-//}
 
 void Game::raycastGridCollision(Raycast& ray)
 {
@@ -667,35 +587,3 @@ void Game::raycastGridCollision(Raycast& ray)
 		}
 	}
 }
-
-///____________________________________________________________________________________________________________________________________________________________
-
-/// QUANTUM CAMERAS
-
-//void Game::handleZoom(std::shared_ptr<Camera2D> camera, Vector2 offset, float zoom)
-//{
-//	float previous_zoom = camera->zoom;
-//	Vector2 previous_offset = camera->offset;
-//	camera->zoom = (monitor_height / (float)screenHeight) * zoom;
-//	camera->offset.x = offset.x - previous_offset.x + (previous_zoom * screenWidth - camera->zoom * screenWidth + offset.x * (previous_zoom - camera->zoom)) / 2;
-//	camera->offset.y = offset.y - previous_offset.y + (previous_zoom * screenHeight - camera->zoom * screenHeight + offset.y * (previous_zoom - camera->zoom)) / 2;
-//
-//}
-
-
-/// DRONE DIRECTION INDICATOR
-
-//DrawLineEx({ drone.center().x + drone.size, drone.center().y },
-//	{ drone.position.x + (drone.size / 2 - 6 * std::sqrtf(3)), drone.position.y + (drone.size /2 - 6 * std::sqrtf(3)) }, 4, WHITE);
-//DrawLineEx({ drone.center().x + drone.size, drone.center().y },
-//	{ drone.position.x + (drone.size / 2 - 6 * std::sqrtf(3)), drone.position.y + drone.size * 2 - (drone.size / 2 - 6 * std::sqrtf(3)) }, 4, WHITE);
-//DrawPolyLinesEx(drone.center(), 3, drone.size, 0 , 8, WHITE);
-//DrawLineEx({ drone.center().x + drone.size, drone.center().y }, { drone.center().x - drone.size, drone.center().y}, 4, WHITE);
-//DrawLineEx({ drone.center().x, drone.center().y + drone.size }, { drone.center().x, drone.center().y - drone.size }, 4, WHITE);
-//DrawLineEx({ drone.center().x + drone.size, drone.center().y }, { drone.center().x - (drone.size / 2 * 3) + drone.size, drone.center().y}, 4, WHITE);
-//DrawLineEx({ drone.center().x, drone.center().y + (drone.size / 2 * 3) - drone.size },
-//		   { drone.center().x, drone.center().y - (drone.size / 2 * 3) + drone.size }, 4, WHITE);
-//DrawLineEx({ drone.center().x + ((drone.size / 2 * 3) - drone.size) / 2,
-//	         drone.center().y + (drone.size / 2 * 3) - drone.size - ((drone.size / 2 * 3) - drone.size) / 4 },
-//		   { drone.center().x + ((drone.size / 2 * 3) - drone.size) / 2,
-//	         drone.center().y - (drone.size / 2 * 3) + drone.size + ((drone.size / 2 * 3) - drone.size) / 4 }, 4, WHITE);
