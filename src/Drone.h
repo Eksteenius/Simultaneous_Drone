@@ -29,6 +29,7 @@ public:
 	float rotation_speed = 180;
 
 	float proximity_distance = 5.0f;
+	Vector2* target = nullptr;
 	bool path_valid = false;
 	bool using_previous = false;
 

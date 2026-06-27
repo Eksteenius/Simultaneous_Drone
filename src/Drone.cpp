@@ -22,15 +22,28 @@ void Drone::moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, floa
 		{
 			if (_pathfinder->pathing_solved)
 			{
-				path_progress = _pathfinder->getPath().size() - 2;
+				path_progress = _pathfinder->getPath().size() - 1;
 			}
 			else
 			{
-				path_progress = _pathfinder->getLastSolvedPath().size() - 2;
+				path_progress = _pathfinder->getLastSolvedPath().size() - 1;
 			}
 			_pathfinder->path_in_use = true;
+			
+			/// Set next tile
+			setPathing(_pathfinder, path_progress - 1);
+			if (target == nullptr || (target->x != path_coords.x || target->y != path_coords.y))
+			{
+				setPathing(_pathfinder, path_progress);
 
-			setPathing(_pathfinder, path_progress);
+				//fov = 90;
+			}
+			//else
+			//{
+			//	fov = 45;
+			//}
+			delete target;
+			target = new Vector2(path_coords.x, path_coords.y);
 		}
 
 		if (path_valid)
@@ -50,6 +63,9 @@ void Drone::moveOnPath(std::shared_ptr<Pathfinder> _pathfinder, float size, floa
 
 				/// Set next tile 
 				setPathing(_pathfinder, path_progress);
+				delete target;
+				target = new Vector2(path_coords.x, path_coords.y);
+				//fov = 90;
 
 				/// move using remaining speed to prevent abrupt stops when reaching proximity distance
 				float unused_movement = (speed * dt) - (proximity_distance - utils::magnitude(distance));
@@ -103,7 +119,7 @@ void Drone::setPathing(std::shared_ptr<Pathfinder> _pathfinder, int index)
 
 Vector2 Drone::getPathingCoords(std::vector<std::reference_wrapper<Cell>>& _path, int index)
 {
-	return Vector2(_path[path_progress].get().i, _path[path_progress].get().j);
+	return Vector2(_path[index].get().i, _path[index].get().j);
 }
 
 void Drone::moveToPoint(Vector2 point, float amount, float dt)
