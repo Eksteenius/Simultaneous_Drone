@@ -39,7 +39,7 @@ void Pathfinder::AStar()
                 {
                     Cell& neighbor = current_cell.neighbors.at(i);
 
-                    if (neighbor.evaluation != Cell::CLOSED && neighbor.barrier == false)
+                    if (neighbor.evaluation != Cell::CLOSED && neighbor.state != Cell::BLOCKED)
                     {
                         bool diagonal_blocked = false;
                         if(neighbor.i != current_cell.i && neighbor.j != current_cell.j)
@@ -47,12 +47,12 @@ void Pathfinder::AStar()
                             int difference_i = current_cell.i - neighbor.i;
                             int difference_j = current_cell.j - neighbor.j;
 
-                            if(cells.at(current_cell.j * (int)sqrt(cells.size()) + current_cell.i - difference_i).barrier)
+                            if(cells.at(current_cell.j * (int)sqrt(cells.size()) + current_cell.i - difference_i).state == Cell::BLOCKED)
                             {
                                 diagonal_blocked = true;
                             }
 
-                            if (cells.at((current_cell.j - difference_j) * (int)sqrt(cells.size()) + current_cell.i).barrier)
+                            if (cells.at((current_cell.j - difference_j) * (int)sqrt(cells.size()) + current_cell.i).state == Cell::BLOCKED)
                             {
                                 diagonal_blocked = true;
                             }

@@ -218,9 +218,9 @@ void Game::update()
 
 			raycastGridCollision(raycasts[i]);
 
-			if (raycasts[i].collided && cells[raycasts[i].collider_index].barrier != true)
+			if (raycasts[i].collided && cells[raycasts[i].collider_index].state != Cell::BLOCKED)
 			{
-				cells[raycasts[i].collider_index].barrier = true;
+				cells[raycasts[i].collider_index].state = Cell::BLOCKED;
 				pathfinder->path_set = false;
 			}
 		}
@@ -301,7 +301,7 @@ void Game::render()
 			//DrawRectangleLinesEx({ (cell.i * grid_rect_size), (cell.j * grid_rect_size), grid_rect_size, grid_rect_size }, 1, WHITE);
 
 			/// BARRIER
-			if (cell.barrier == true)
+			if (cell.state == Cell::BLOCKED)
 			{
 				Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
 				drawGridNode(cell_center, grid_rect_size / 2, BLACK, ColorAlpha(BLACK, 0.25f));

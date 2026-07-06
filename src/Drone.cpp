@@ -103,13 +103,13 @@ int Drone::rayCount(float min_size)
 void Drone::setPathing(std::shared_ptr<Pathfinder> _pathfinder, int index)
 {
 	path_valid = false;
-	if (_pathfinder->pathing_solved && _pathfinder->getPath()[path_progress].get().barrier == false)
+	if (_pathfinder->pathing_solved && _pathfinder->getPath()[path_progress].get().state != Cell::BLOCKED)
 	{
 		path_coords = getPathingCoords(_pathfinder->getPath(), index);
 		path_valid = true;
 		using_previous = false;
 	}
-	else if (_pathfinder->getLastSolvedPath().size() > 0 && _pathfinder->getLastSolvedPath()[path_progress].get().barrier == false)
+	else if (_pathfinder->getLastSolvedPath().size() > 0 && _pathfinder->getLastSolvedPath()[path_progress].get().state != Cell::BLOCKED)
 	{
 		path_coords = getPathingCoords(_pathfinder->getLastSolvedPath(), index);
 		path_valid = true;

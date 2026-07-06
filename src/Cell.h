@@ -25,7 +25,7 @@ public:
 		BLOCKED = 1
 	};
 
-	bool barrier = false;
+	State state = UNKNOWN;
 
 	float f = 0;
 	float g = 0;
