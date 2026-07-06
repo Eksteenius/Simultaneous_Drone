@@ -81,7 +81,8 @@ bool Game::init(bool reset)
 	pathfinder = std::make_shared<Pathfinder>(Pathfinder(cells));
 
 	/// Drone initialization
-	drone.size = (grid_rect_size / 2.f);
+	drones.emplace_back();
+	drones[0].size = (grid_rect_size / 2.f);
 
 	return true;
 }
@@ -144,11 +145,11 @@ void Game::update()
 		/// DRONE INPUTS
 		if (IsKeyReleased(KEY_EQUAL))
 		{
-			drone.range *= 1.1f;
+			drones[0].range *= 1.1f;
 		}
 		else if (IsKeyReleased(KEY_MINUS))
 		{
-			drone.range /= 1.1f;
+			drones[0].range /= 1.1f;
 		}
 
 		/// BUTTONS
@@ -202,19 +203,19 @@ void Game::update()
 		}
 
 		/// RAYCASTING
-		float fov_ray_count = drone.rayCount(grid_rect_size);
+		float fov_ray_count = drones[0].rayCount(grid_rect_size);
 		if (raycasts.size() < fov_ray_count)
 		{
 			while (raycasts.size() < fov_ray_count)
 			{
-				raycasts.push_back(Raycast(drone.center(), world_mouse_position));
+				raycasts.push_back(Raycast(drones[0].center(), world_mouse_position));
 			}
 		}
 		for (int i = 0; i < fov_ray_count; i++)
 		{
-			raycasts[i].start = drone.center();
-			raycasts[i].end = Vector2Add(drone.center(),
-				Vector2Scale(utils::unitVectorFromAngle(drone.rotation + (drone.fov / 2.f) - (drone.fov / (fov_ray_count - 1)) * i), drone.range));
+			raycasts[i].start = drones[0].center();
+			raycasts[i].end = Vector2Add(drones[0].center(),
+				Vector2Scale(utils::unitVectorFromAngle(drones[0].rotation + (drones[0].fov / 2.f) - (drones[0].fov / (fov_ray_count - 1)) * i), drones[0].range));
 
 			raycastGridCollision(raycasts[i]);
 
@@ -228,21 +229,9 @@ void Game::update()
 		/// PATHFINDING
 		if (!pathfinder->path_set)
 		{
-			//Vector2 drone_pathing_coords = drone.getCurrentPathing();
-			//if (drone.path_valid)
-			//{
-			//	pathfinder->setStartEndIndex(
-			//		utils::coordsToIndex(drone_pathing_coords, grid_root_size),
-			//		utils::coordsToIndex(destination_coords, grid_root_size));
-			//}
-			//else
-			{
-				pathfinder->setStartEndIndex(
-					utils::coordsToIndex(utils::globalToCoords(drone.center(), grid_rect_size), grid_root_size),
-					utils::coordsToIndex(destination_coords, grid_root_size));
-			}
-
-
+			pathfinder->setStartEndIndex(
+				utils::coordsToIndex(utils::globalToCoords(drones[0].center(), grid_rect_size), grid_root_size),
+				utils::coordsToIndex(destination_coords, grid_root_size));
 		}
 		/// PATHFIND SOLVING
 		{
@@ -257,7 +246,7 @@ void Game::update()
 		/// DRONE MOVEMENT
 		if (btn_droning.active)
 		{
-			drone.moveOnPath(pathfinder, grid_rect_size, dt);
+			drones[0].moveOnPath(pathfinder, grid_rect_size, dt);
 			//drone.moveToPoint(utils::coordsToGlobal(destination_coords, grid_rect_size), dt);
 		}
 	}
@@ -391,11 +380,11 @@ void Game::render()
 	}
 
 	/// PROXIMITY PATHING - Renders a small green outline to show the proximity distance the drone needs to be to the destination cell
-	Vector2 drone_pathing = utils::coordsToGlobal(drone.getCurrentPathing(), grid_rect_size);
-	if(drone.proximity_distance >= 1)
+	Vector2 drone_pathing = utils::coordsToGlobal(drones[0].getCurrentPathing(), grid_rect_size);
+	if(drones[0].proximity_distance >= 1)
 	{
 		DrawCircleLines(drone_pathing.x + grid_rect_size / 2, drone_pathing.y + grid_rect_size / 2,
-			drone.proximity_distance, ColorAlpha(GREEN, 1));
+			drones[0].proximity_distance, ColorAlpha(GREEN, 1));
 	}
 	
 	/// SELECTED CELL
@@ -406,9 +395,9 @@ void Game::render()
 	}
 
 	/// RAYCASTING
-	float fov_ray_count = drone.rayCount(grid_rect_size);
+	float fov_ray_count = drones[0].rayCount(grid_rect_size);
 
-	DrawCircleSector(drone.center(), drone.range, drone.rotation - drone.fov / 2, drone.rotation + drone.fov / 2, fov_ray_count - 1, ColorAlpha(RED, 0.5f));
+	DrawCircleSector(drones[0].center(), drones[0].range, drones[0].rotation - drones[0].fov / 2, drones[0].rotation + drones[0].fov / 2, fov_ray_count - 1, ColorAlpha(RED, 0.5f));
 
 	if (fov_ray_count > 0 && raycasts.size() > 0 && raycasts.size() >= fov_ray_count)
 	{
@@ -434,13 +423,13 @@ void Game::render()
 	}
 
 	/// DRONE
-	DrawRing(drone.center(), drone.size - 4, drone.size, 0, 360, 1, WHITE);
+	DrawRing(drones[0].center(), drones[0].size - 4, drones[0].size, 0, 360, 1, WHITE);
 	/// Center dot
-	DrawCircle(drone.center().x, drone.center().y, 4, WHITE); 
+	DrawCircle(drones[0].center().x, drones[0].center().y, 4, WHITE); 
 	/// Direction arrow
-	DrawPolyLinesEx(drone.center(), 3, drone.size, drone.rotation , 8, WHITE);
-	DrawPolyLinesEx({ drone.center().x + (drone.size - drone.size / 2) * cosf(drone.rotation * PI / 180.0),
-					  drone.center().y + (drone.size - drone.size / 2) * sinf(drone.rotation * PI / 180.0) }, 3, drone.size / 2, drone.rotation, 8, WHITE);
+	DrawPolyLinesEx(drones[0].center(), 3, drones[0].size, drones[0].rotation , 8, WHITE);
+	DrawPolyLinesEx({ drones[0].center().x + (drones[0].size - drones[0].size / 2) * cosf(drones[0].rotation * PI / 180.0),
+					  drones[0].center().y + (drones[0].size - drones[0].size / 2) * sinf(drones[0].rotation * PI / 180.0) }, 3, drones[0].size / 2, drones[0].rotation, 8, WHITE);
 
 	/// CUSTOM CURSOR
 	//DrawCircle(game_mouse_position.x, game_mouse_position.y, 4, GREEN);
