@@ -18,6 +18,13 @@ public:
 	int i = 0;
 	int j = 0;
 
+	enum State
+	{
+		UNKNOWN = -1,
+		CLEAR = 0,
+		BLOCKED = 1
+	};
+
 	bool barrier = false;
 
 	float f = 0;
@@ -26,14 +33,14 @@ public:
 
 	std::shared_ptr<std::reference_wrapper<Cell>> previous = nullptr;
 
-	enum Status
+	enum Evaluation
 	{
 		NONE = -1,
 		CLOSED = 0,
 		OPEN = 1
 	};
 
-	Status status = NONE;
+	Evaluation evaluation = NONE;
 
 	bool operator==(const Cell& other) const 
 	{

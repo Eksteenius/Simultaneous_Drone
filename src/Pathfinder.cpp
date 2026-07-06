@@ -31,7 +31,7 @@ void Pathfinder::AStar()
                 //open_set.remove(current_cell);
                 open_set.pop_back();
 
-                current_cell.status = Cell::CLOSED;
+                current_cell.evaluation = Cell::CLOSED;
                 closed_set.push_back(current_cell);
 
 
@@ -39,7 +39,7 @@ void Pathfinder::AStar()
                 {
                     Cell& neighbor = current_cell.neighbors.at(i);
 
-                    if (neighbor.status != Cell::CLOSED && neighbor.barrier == false)
+                    if (neighbor.evaluation != Cell::CLOSED && neighbor.barrier == false)
                     {
                         bool diagonal_blocked = false;
                         if(neighbor.i != current_cell.i && neighbor.j != current_cell.j)
@@ -73,7 +73,7 @@ void Pathfinder::AStar()
 
                             bool new_path = false;
 
-                            if (neighbor.status == Cell::OPEN)
+                            if (neighbor.evaluation == Cell::OPEN)
                             {
                                 if (tentative_g < neighbor.g)
                                 {
@@ -86,7 +86,7 @@ void Pathfinder::AStar()
                                 neighbor.g = tentative_g;
                                 new_path = true;
 
-                                neighbor.status = Cell::OPEN;
+                                neighbor.evaluation = Cell::OPEN;
                                 open_set.push_back(neighbor);
                             }
 
@@ -214,7 +214,7 @@ void Pathfinder::resetPathfinder()
     pathing_complete = false;
     pathing_solved = false;
 
-    cells[start_cell_index].status = Cell::OPEN;
+    cells[start_cell_index].evaluation = Cell::OPEN;
     open_set.push_back(cells[start_cell_index]);
 
     path_in_use = false;

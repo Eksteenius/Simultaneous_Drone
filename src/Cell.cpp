@@ -19,7 +19,7 @@ void Cell::resetPathData()
 
     previous = nullptr;
 
-    status = NONE;
+    evaluation = NONE;
 }
 
 void Cell::addNeighbors(std::vector<Cell>& cells, int rows, int columns)

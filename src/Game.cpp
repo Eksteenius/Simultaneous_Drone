@@ -281,7 +281,8 @@ void Game::update()
 
 void Game::render()
 {
-	DrawRectangle(0, 0, screen_width, screen_height, GRAY);
+	/// Renders a gray rect to show how large the screen would be without any zoom other than resolution scaling
+	DrawRectangle(0, 0, screen_width, screen_height, GRAY); 
 
 	/// CELLS
 	DrawRectangle(0, 0, grid_root_size * grid_rect_size, grid_root_size * grid_rect_size, DARKGRAY);
@@ -303,8 +304,7 @@ void Game::render()
 			if (cell.barrier == true)
 			{
 				Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-				DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(BLACK, 0.25f));
-				DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, BLACK);
+				drawGridNode(cell_center, grid_rect_size / 2, BLACK, ColorAlpha(BLACK, 0.25f));
 			}
 		}
 	}
@@ -316,10 +316,7 @@ void Game::render()
 		{
 			Vector2 coords = utils::indexToCoords(i, grid_root_size);
 
-			DrawRectangle(coords.x * grid_rect_size + 1, coords.y * grid_rect_size + 1,
-				grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(BLACK, 0.25f));
-			DrawRectangleLinesEx({ coords.x * grid_rect_size + 2, coords.y * grid_rect_size + 2,
-				grid_rect_size - 4, grid_rect_size - 4 }, 4, BLACK);
+			drawGridSquare(coords, grid_rect_size, BLACK, ColorAlpha(BLACK, 0.25f));
 		}
 	}
 
@@ -342,8 +339,7 @@ void Game::render()
 						std::find(pathfinder->getLastSolvedPath().begin(), pathfinder->getLastSolvedPath().end(), cell) == pathfinder->getLastSolvedPath().end()))
 				{
 					Vector2 cell_center = utils::center({ cell.i * grid_rect_size, cell.j * grid_rect_size }, grid_rect_size);
-					DrawCircle(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, ColorAlpha(DARKBLUE, 0.25f));
-					DrawRing(cell_center, grid_rect_size / 2 - 8, grid_rect_size / 2 - 2, 0, 360, 1, DARKBLUE);
+					drawGridNode(cell_center, grid_rect_size / 2, DARKBLUE, ColorAlpha(DARKBLUE, 0.25f));
 				}
 			}
 		}
@@ -394,7 +390,7 @@ void Game::render()
 		drawGridNode(cell_center, grid_rect_size / 2, Color(0, 255, 0, 255), ColorAlpha(GREEN, 0.25f));
 	}
 
-	/// PROXIMITY PATHING
+	/// PROXIMITY PATHING - Renders a small green outline to show the proximity distance the drone needs to be to the destination cell
 	Vector2 drone_pathing = utils::coordsToGlobal(drone.getCurrentPathing(), grid_rect_size);
 	if(drone.proximity_distance >= 1)
 	{
@@ -406,10 +402,7 @@ void Game::render()
 	hovered_cell = utils::globalToCoords(world_mouse_position, grid_rect_size);
 	if (utils::coordsWithinGrid(hovered_cell, grid_root_size))
 	{
-		DrawRectangle(hovered_cell.x * grid_rect_size + 1, hovered_cell.y * grid_rect_size + 1,
-			grid_rect_size - 2, grid_rect_size - 2, ColorAlpha(YELLOW, 0.5f));
-		DrawRectangleLinesEx({ hovered_cell.x * grid_rect_size + 2, hovered_cell.y * grid_rect_size + 2,
-			grid_rect_size - 4, grid_rect_size - 4 }, 4, YELLOW);
+		drawGridSquare(hovered_cell, grid_rect_size, YELLOW, ColorAlpha(YELLOW, 0.5f));
 	}
 
 	/// RAYCASTING
@@ -422,18 +415,18 @@ void Game::render()
 		//for (const Raycast& ray : raycasts)
 		for (int i = 0; i < fov_ray_count; i++)
 		{
-			if (raycasts[i].collided)
+			if (raycasts[i].collided) /// Render the fov rays that collided an obstacle
 			{
 				DrawLine(raycasts[i].start.x, raycasts[i].start.y, raycasts[i].end.x, raycasts[i].end.y, RED);
 
-				DrawCircle(raycasts[i].collision.x, raycasts[i].collision.y, 2, RED);
-				DrawCircleLines(raycasts[i].collision.x, raycasts[i].collision.y, 10, YELLOW);
+				DrawCircle(raycasts[i].collision.x, raycasts[i].collision.y, 2, RED); /// red outline around obstacle node
+				DrawCircleLines(raycasts[i].collision.x, raycasts[i].collision.y, 10, YELLOW); /// yellow circle at point of collision
 
 				Cell& cell_collided = cells[raycasts[i].collider_index];
 				Vector2 cell_center = utils::center(utils::coordsToGlobal(cell_collided.i, cell_collided.j, grid_rect_size), grid_rect_size);
 				DrawCircleLines(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, RED);
 			}
-			else
+			else /// Render the fov rays that did not collide with an obstacle
 			{
 				DrawLine(raycasts[i].start.x, raycasts[i].start.y, raycasts[i].end.x, raycasts[i].end.y, WHITE);
 			}
@@ -442,7 +435,9 @@ void Game::render()
 
 	/// DRONE
 	DrawRing(drone.center(), drone.size - 4, drone.size, 0, 360, 1, WHITE);
-	DrawCircle(drone.center().x, drone.center().y, 4, WHITE);
+	/// Center dot
+	DrawCircle(drone.center().x, drone.center().y, 4, WHITE); 
+	/// Direction arrow
 	DrawPolyLinesEx(drone.center(), 3, drone.size, drone.rotation , 8, WHITE);
 	DrawPolyLinesEx({ drone.center().x + (drone.size - drone.size / 2) * cosf(drone.rotation * PI / 180.0),
 					  drone.center().y + (drone.size - drone.size / 2) * sinf(drone.rotation * PI / 180.0) }, 3, drone.size / 2, drone.rotation, 8, WHITE);
@@ -480,9 +475,12 @@ void Game::drawGridNode(Vector2 center, float radius, Color outlineColor, Color 
 	DrawRing(center, radius - 8, radius - 2, 0, 360, 1, outlineColor);
 }
 
-void Game::drawGridSquare()
+void Game::drawGridSquare(Vector2 coords, float size, Color outlineColor, Color fillColor)
 {
-
+	DrawRectangle(coords.x * size + 1, coords.y * size + 1,
+		size - 2, size - 2, fillColor);
+	DrawRectangleLinesEx({ coords.x * size + 2, coords.y * size + 2,
+		size - 4, size - 4 }, 4, outlineColor);
 }
 
 void Game::updateKeyToggles()

@@ -46,7 +46,7 @@ public:
 
 	/// RENDERING
 	void drawGridNode(Vector2 center, float radius, Color outlineColor, Color fillColor);
-	void drawGridSquare();
+	void drawGridSquare(Vector2 coords, float size, Color outlineColor, Color fillColor);
 
 	/// INPUTS
 	void updateKeyToggles();
