@@ -82,7 +82,13 @@ bool Game::init(bool reset)
 
 	/// Drone initialization
 	drones.emplace_back();
-	drones[0].size = (grid_rect_size / 2.f);
+	drones.emplace_back();
+	for (Drone& drone : drones)
+	{
+		drone.size = (grid_rect_size / 2.f);
+	}
+	drones[1].position = Vector2(100, 800);
+	
 
 	return true;
 }
@@ -145,11 +151,17 @@ void Game::update()
 		/// DRONE INPUTS
 		if (IsKeyReleased(KEY_EQUAL))
 		{
-			drones[0].range *= 1.1f;
+			for (Drone& drone : drones)
+			{
+				drone.range *= 1.1f;
+			}
 		}
 		else if (IsKeyReleased(KEY_MINUS))
 		{
-			drones[0].range /= 1.1f;
+			for (Drone& drone : drones)
+			{
+				drone.range /= 1.1f;
+			}
 		}
 
 		/// BUTTONS
@@ -203,51 +215,57 @@ void Game::update()
 		}
 
 		/// RAYCASTING
-		float fov_ray_count = drones[0].rayCount(grid_rect_size);
-		if (raycasts.size() < fov_ray_count)
+		for (Drone& drone : drones)
 		{
-			while (raycasts.size() < fov_ray_count)
+			float fov_ray_count = drone.rayCount(grid_rect_size);
+			if (drone.raycasts.size() < fov_ray_count)
 			{
-				raycasts.push_back(Raycast(drones[0].center(), world_mouse_position));
+				while (drone.raycasts.size() < fov_ray_count)
+				{
+					drone.raycasts.push_back(Raycast(drone.center(), world_mouse_position));
+				}
 			}
-		}
-		for (int i = 0; i < fov_ray_count; i++)
-		{
-			raycasts[i].start = drones[0].center();
-			raycasts[i].end = Vector2Add(drones[0].center(),
-				Vector2Scale(utils::unitVectorFromAngle(drones[0].rotation + (drones[0].fov / 2.f) - (drones[0].fov / (fov_ray_count - 1)) * i), drones[0].range));
-
-			raycastGridCollision(raycasts[i]);
-
-			if (raycasts[i].collided && cells[raycasts[i].collider_index].state != Cell::BLOCKED)
+			for (int i = 0; i < fov_ray_count; i++)
 			{
-				cells[raycasts[i].collider_index].state = Cell::BLOCKED;
-				pathfinder->path_set = false;
+				drone.raycasts[i].start = drone.center();
+				drone.raycasts[i].end = Vector2Add(drone.center(),
+					Vector2Scale(utils::unitVectorFromAngle(drone.rotation + (drone.fov / 2.f) - (drone.fov / (fov_ray_count - 1)) * i), drone.range));
+
+				raycastGridCollision(drone.raycasts[i]);
+
+				if (drone.raycasts[i].collided && cells[drone.raycasts[i].collider_index].state != Cell::BLOCKED)
+				{
+					cells[drone.raycasts[i].collider_index].state = Cell::BLOCKED;
+					pathfinder->path_set = false;
+				}
 			}
 		}
 
 		/// PATHFINDING
-		if (!pathfinder->path_set)
+		for (Drone& drone : drones)
 		{
-			pathfinder->setStartEndIndex(
-				utils::coordsToIndex(utils::globalToCoords(drones[0].center(), grid_rect_size), grid_root_size),
-				utils::coordsToIndex(destination_coords, grid_root_size));
-		}
-		/// PATHFIND SOLVING
-		{
-			//int i = 0;
-			while (!pathfinder->pathing_complete) //&& (pathfinder->search_iterations < 0 || i < pathfinder->search_iterations / 10))
+			if (!pathfinder->path_set)
 			{
-				pathfinder->AStar();
-				//i++;
+				pathfinder->setStartEndIndex(
+					utils::coordsToIndex(utils::globalToCoords(drone.center(), grid_rect_size), grid_root_size),
+					utils::coordsToIndex(destination_coords, grid_root_size));
 			}
-		}
+			/// PATHFIND SOLVING
+			{
+				//int i = 0;
+				while (!pathfinder->pathing_complete) //&& (pathfinder->search_iterations < 0 || i < pathfinder->search_iterations / 10))
+				{
+					pathfinder->AStar();
+					//i++;
+				}
+			}
 
-		/// DRONE MOVEMENT
-		if (btn_droning.active)
-		{
-			drones[0].moveOnPath(pathfinder, grid_rect_size, dt);
-			//drone.moveToPoint(utils::coordsToGlobal(destination_coords, grid_rect_size), dt);
+			/// DRONE MOVEMENT
+			if (btn_droning.active)
+			{
+				drone.moveOnPath(pathfinder, grid_rect_size, dt);
+				//drone.moveToPoint(utils::coordsToGlobal(destination_coords, grid_rect_size), dt);
+			}
 		}
 	}
 
@@ -380,11 +398,14 @@ void Game::render()
 	}
 
 	/// PROXIMITY PATHING - Renders a small green outline to show the proximity distance the drone needs to be to the destination cell
-	Vector2 drone_pathing = utils::coordsToGlobal(drones[0].getCurrentPathing(), grid_rect_size);
-	if(drones[0].proximity_distance >= 1)
+	for (Drone& drone : drones)
 	{
-		DrawCircleLines(drone_pathing.x + grid_rect_size / 2, drone_pathing.y + grid_rect_size / 2,
-			drones[0].proximity_distance, ColorAlpha(GREEN, 1));
+		Vector2 proximity = utils::coordsToGlobal(drone.getCurrentPathing(), grid_rect_size);
+		if (drone.proximity_distance >= 1)
+		{
+			DrawCircleLines(proximity.x + grid_rect_size / 2, proximity.y + grid_rect_size / 2,
+				drone.proximity_distance, ColorAlpha(GREEN, 1));
+		}
 	}
 	
 	/// SELECTED CELL
@@ -395,41 +416,47 @@ void Game::render()
 	}
 
 	/// RAYCASTING
-	float fov_ray_count = drones[0].rayCount(grid_rect_size);
-
-	DrawCircleSector(drones[0].center(), drones[0].range, drones[0].rotation - drones[0].fov / 2, drones[0].rotation + drones[0].fov / 2, fov_ray_count - 1, ColorAlpha(RED, 0.5f));
-
-	if (fov_ray_count > 0 && raycasts.size() > 0 && raycasts.size() >= fov_ray_count)
+	for (Drone& drone : drones)
 	{
-		//for (const Raycast& ray : raycasts)
-		for (int i = 0; i < fov_ray_count; i++)
+		float fov_ray_count = drone.rayCount(grid_rect_size);
+
+		DrawCircleSector(drone.center(), drone.range, drone.rotation - drone.fov / 2, drone.rotation + drone.fov / 2, fov_ray_count - 1, ColorAlpha(RED, 0.5f));
+
+		if (fov_ray_count > 0 && drone.raycasts.size() > 0 && drone.raycasts.size() >= fov_ray_count)
 		{
-			if (raycasts[i].collided) /// Render the fov rays that collided an obstacle
+			//for (const Raycast& ray : drone.raycasts)
+			for (int i = 0; i < fov_ray_count; i++)
 			{
-				DrawLine(raycasts[i].start.x, raycasts[i].start.y, raycasts[i].end.x, raycasts[i].end.y, RED);
+				if (drone.raycasts[i].collided) /// Render the fov rays that collided an obstacle
+				{
+					DrawLine(drone.raycasts[i].start.x, drone.raycasts[i].start.y, drone.raycasts[i].end.x, drone.raycasts[i].end.y, RED);
 
-				DrawCircle(raycasts[i].collision.x, raycasts[i].collision.y, 2, RED); /// red outline around obstacle node
-				DrawCircleLines(raycasts[i].collision.x, raycasts[i].collision.y, 10, YELLOW); /// yellow circle at point of collision
+					DrawCircle(drone.raycasts[i].collision.x, drone.raycasts[i].collision.y, 2, RED); /// red outline around obstacle node
+					DrawCircleLines(drone.raycasts[i].collision.x, drone.raycasts[i].collision.y, 10, YELLOW); /// yellow circle at point of collision
 
-				Cell& cell_collided = cells[raycasts[i].collider_index];
-				Vector2 cell_center = utils::center(utils::coordsToGlobal(cell_collided.i, cell_collided.j, grid_rect_size), grid_rect_size);
-				DrawCircleLines(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, RED);
-			}
-			else /// Render the fov rays that did not collide with an obstacle
-			{
-				DrawLine(raycasts[i].start.x, raycasts[i].start.y, raycasts[i].end.x, raycasts[i].end.y, WHITE);
+					Cell& cell_collided = cells[drone.raycasts[i].collider_index];
+					Vector2 cell_center = utils::center(utils::coordsToGlobal(cell_collided.i, cell_collided.j, grid_rect_size), grid_rect_size);
+					DrawCircleLines(cell_center.x, cell_center.y, grid_rect_size / 2 - 2, RED);
+				}
+				else /// Render the fov rays that did not collide with an obstacle
+				{
+					DrawLine(drone.raycasts[i].start.x, drone.raycasts[i].start.y, drone.raycasts[i].end.x, drone.raycasts[i].end.y, WHITE);
+				}
 			}
 		}
 	}
 
 	/// DRONE
-	DrawRing(drones[0].center(), drones[0].size - 4, drones[0].size, 0, 360, 1, WHITE);
-	/// Center dot
-	DrawCircle(drones[0].center().x, drones[0].center().y, 4, WHITE); 
-	/// Direction arrow
-	DrawPolyLinesEx(drones[0].center(), 3, drones[0].size, drones[0].rotation , 8, WHITE);
-	DrawPolyLinesEx({ drones[0].center().x + (drones[0].size - drones[0].size / 2) * cosf(drones[0].rotation * PI / 180.0),
-					  drones[0].center().y + (drones[0].size - drones[0].size / 2) * sinf(drones[0].rotation * PI / 180.0) }, 3, drones[0].size / 2, drones[0].rotation, 8, WHITE);
+	for (Drone& drone : drones)
+	{
+		DrawRing(drone.center(), drone.size - 4, drone.size, 0, 360, 1, WHITE);
+		/// Center dot
+		DrawCircle(drone.center().x, drone.center().y, 4, WHITE);
+		/// Direction arrow
+		DrawPolyLinesEx(drone.center(), 3, drone.size, drone.rotation, 8, WHITE);
+		DrawPolyLinesEx({ drone.center().x + (drone.size - drone.size / 2) * cosf(drone.rotation * PI / 180.0),
+						  drone.center().y + (drone.size - drone.size / 2) * sinf(drone.rotation * PI / 180.0) }, 3, drone.size / 2, drone.rotation, 8, WHITE);
+	}
 
 	/// CUSTOM CURSOR
 	//DrawCircle(game_mouse_position.x, game_mouse_position.y, 4, GREEN);

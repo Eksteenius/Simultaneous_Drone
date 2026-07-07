@@ -12,9 +12,7 @@
 #include "utils.h"
 
 #include "Button.h"
-#include "Pathfinder.h"
 #include "Drone.h"
-#include "Raycast.h"
 
 class Game
 {
@@ -85,9 +83,6 @@ private:
 	std::vector<Drone> drones;
 	std::shared_ptr<Pathfinder> pathfinder;
 	Vector2 destination_coords = { (float)(grid_root_size - 1), (float)(grid_root_size - 1)};
-
-	/// Raycasting
-	std::vector<Raycast> raycasts;
 	
 	/// Inputs
 	std::vector<KeyboardKey> key_pause;

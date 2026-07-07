@@ -6,6 +6,7 @@
 #include "utils.h"
 
 #include "Pathfinder.h"
+#include "Raycast.h"
 
 
 class Drone
@@ -36,6 +37,8 @@ public:
 	/// Raycasting
 	float fov = 90;
 	float range = 1000;
+
+	std::vector<Raycast> raycasts;
 
 private:
 	void setPathing(std::shared_ptr<Pathfinder> _pathfinder, int index);
